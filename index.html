@@ -12,9 +12,10 @@ window.VERBY_SB = {
   url: 'https://urejdjknivskplofkckd.supabase.co',
   key: 'sb_publishable_TdfBrmzeodFFqZiwCf9Gnw_R4-hHxa2'
 };
-window.VERBY_VERSION = '3.3.0';
+window.VERBY_VERSION = '3.4.0';
 window.VERBY_CHANGELOG = [
-  { v: '3.3.0', t: 'Echte OAuth (Google, GitHub, Apple) via Supabase, Update-Loading-Screen, kein Demo-Login mehr, Changelog-Anzeige' },
+  { v: '3.4.0', t: 'Photo Editor, Charakter-Foto beim Erstellen, erweitertes Dev-Panel' },
+  { v: '3.3.0', t: 'Echte OAuth (Google, GitHub, Apple) via Supabase, Update-Loading-Screen, kein Demo-Login mehr' },
   { v: '3.2.0', t: 'Supabase Auth E-Mail/Passwort, Desktop-Layout, Session-Restore' },
   { v: '3.1.0', t: 'Desktop-Optimierung, Theme-Packs, PWA' },
   { v: '3.0.0', t: 'Explore 2.0, Community, Inbox, Gallery, Safety, Offline, Chat-Suche, *Aktionen*' },
@@ -52,7 +53,7 @@ body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellips
 input,textarea,select{width:100%;padding:13px 15px;border-radius:14px;border:1px solid var(--b);background:var(--s2);color:var(--t);font-size:15px;outline:none}
 input:focus,textarea:focus{border-color:var(--a)}
 textarea{min-height:88px;resize:vertical}
-.avatar{width:56px;height:56px;border-radius:50%;background:var(--s3);display:grid;place-items:center;font-size:24px;overflow:hidden;flex-shrink:0;border:2px solid var(--b)}
+.avatar{width:56px;height:56px;border-radius:50%;background:var(--s3);display:grid;place-items:center;font-size:24px;overflow:hidden;flex-shrink:0;border:2px solid var(--b);background-size:cover;background-position:center}
 .avatar.lg{width:100px;height:100px;font-size:42px}
 .avatar.glow{animation:glowPulse 2s ease-in-out infinite}
 .avatar.frame-gold{box-shadow:0 0 0 3px #fbbf24,0 0 16px rgba(251,191,36,.4)}
@@ -129,7 +130,7 @@ textarea{min-height:88px;resize:vertical}
 <div id="updateOverlay">
   <div class="ut">Update Loads...</div>
   <div id="updateBarWrap"><div id="updateBar"></div></div>
-  <div class="us" id="updateSub">v3.3.0 wird geladen</div>
+  <div class="us" id="updateSub">v3.4.0 wird geladen</div>
 </div>
 <div class="offline-bar" id="offlineBar">Offline-Modus aktiv · lokale Chats verfuegbar</div>
 <div id="landing" class="screen on">
@@ -142,9 +143,9 @@ textarea{min-height:88px;resize:vertical}
     </div>
   </div>
   <div class="hero">
-    <span class="badge">v3.3 · Echte OAuth · Supabase</span>
+    <span class="badge">v3.4 · Photo Editor</span>
     <h1>Charaktere.<br>Chats. Deine Welt.</h1>
-    <p>Premium Character-Chat mit Google-, GitHub- und Apple-Login ueber Supabase.</p>
+    <p>Premium Character-Chat mit Photo Editor, Charakter-Fotos und Google-Login.</p>
     <div class="hero-btns">
       <button class="btn btn-p" onclick="goAuth()">Anmelden</button>
       <button class="btn btn-g" onclick="showPage('updates')">Changelog</button>
@@ -152,10 +153,10 @@ textarea{min-height:88px;resize:vertical}
     </div>
   </div>
   <div class="feat-grid">
-    <div class="feat"><h3>Echte Accounts</h3><p>Google, GitHub, Apple, E-Mail via Supabase.</p></div>
-    <div class="feat"><h3>Explore 2.0</h3><p>Kategorien und Entdecken.</p></div>
-    <div class="feat"><h3>PWA</h3><p>Installierbar und offline-faehig.</p></div>
-    <div class="feat"><h3>Desktop</h3><p>Optimiertes Layout ab 900px.</p></div>
+    <div class="feat"><h3>Photo Editor</h3><p>Bilder bearbeiten und speichern.</p></div>
+    <div class="feat"><h3>Charakter-Fotos</h3><p>Profilbild beim Erstellen.</p></div>
+    <div class="feat"><h3>Dev Panel</h3><p>Freigaben, Export, Tools.</p></div>
+    <div class="feat"><h3>Supabase</h3><p>Echte Online-Accounts.</p></div>
   </div>
 </div>
 <div id="auth" class="screen">
@@ -169,7 +170,7 @@ textarea{min-height:88px;resize:vertical}
     <button class="oauth" onclick="oauthLogin('google')">Weiter mit Google</button>
     <button class="oauth" onclick="oauthLogin('github')">Weiter mit GitHub</button>
     <button class="oauth" onclick="oauthLogin('apple')">Weiter mit Apple</button>
-    <p class="muted" style="font-size:11px;margin-top:14px;line-height:1.4">Redirect: diese Domain muss in Supabase unter Authentication → URL Configuration stehen. Provider unter Authentication → Providers aktivieren.</p>
+    <p class="muted" style="font-size:11px;margin-top:14px;line-height:1.4">Google in Supabase Providers aktivieren (Client ID + Secret).</p>
     <p style="text-align:center;margin-top:12px"><a href="#" onclick="showLanding();return false" style="color:var(--a2)">Zurueck</a></p>
   </div>
 </div>
@@ -183,6 +184,7 @@ textarea{min-height:88px;resize:vertical}
       <button class="nb" data-v="create">Erstellen</button>
       <button class="nb" data-v="inbox">Inbox</button>
       <button class="nb" data-v="gallery">Gallery</button>
+      <button class="nb" data-v="photo">Photo</button>
       <button class="nb" data-v="search">Suche</button>
       <button class="nb" data-v="dev">Dev</button>
       <button class="nb" data-v="settings">Settings</button>
