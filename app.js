@@ -187,7 +187,7 @@ function showPage(which) {
   if (which === 'roadmap') {
     el.innerHTML =
       back +
-      '<h1 style="margin:16px 0">Roadmap</h1><div class="card"><p class="muted">Google OAuth, Supabase, PWA, Explore, Desktop</p></div>';
+      '<h1 style="margin:16px 0">Roadmap</h1><div class="card"><p class="muted">Photo Editor, Google OAuth, Supabase, PWA, Explore</p></div>';
   }
   if (which === 'updates') {
     const logs = (window.VERBY_CHANGELOG || [])
@@ -327,17 +327,49 @@ function renderReal(view) {
   if (view === 'create') {
     root.innerHTML =
       '<div class="card glass"><div class="h2">Charakter erstellen</div>' +
+      '<div class="form-g"><label>Profilbild</label>' +
+      '<div class="row" style="gap:12px;align-items:center">' +
+      '<div class="avatar lg" id="cPreview" style="width:72px;height:72px;font-size:28px">✨</div>' +
+      '<div class="grow"><input type="file" id="cPhoto" accept="image/*" style="font-size:13px">' +
+      '<p class="muted" style="margin-top:6px">JPG/PNG, max 2.5 MB</p></div></div></div>' +
       '<div class="form-g"><label>Name *</label><input id="cn"></div>' +
       '<div class="form-g"><label>Begruessung *</label><textarea id="cg"></textarea></div>' +
       '<div class="form-g"><label>Kurzbeschreibung</label><input id="cs"></div>' +
+      '<div class="form-g"><label>Aussehen / Tags</label><input id="ctags" placeholder="z.B. blond, friendly"></div>' +
+      '<div class="form-g"><label>Alter (optional)</label><input id="cage" type="number" min="1" max="999" placeholder="18+"></div>' +
       '<div class="form-g"><label>Kategorie</label><select id="cc">' +
       CATS.filter(function (c) { return c !== 'Alle'; }).map(function (c) { return '<option>' + c + '</option>'; }).join('') +
       '</select></div>' +
-      '<div class="form-g"><label>Memory</label><textarea id="cl"></textarea></div>' +
+      '<div class="form-g"><label>Memory / Lore</label><textarea id="cl"></textarea></div>' +
       (store.mode() === 'adult' && adultAllowed()
-        ? '<label class="muted"><input type="checkbox" id="cnsfw"> Intern</label><br><br>'
+        ? '<label class="muted"><input type="checkbox" id="cnsfw"> Intern / Adult-Charakter</label><br><br>'
         : '') +
-      '<button class="btn btn-p" onclick="saveChar()">Speichern</button></div>';
+      '<button class="btn btn-p" onclick="saveChar()">Speichern</button> ' +
+      '<button class="btn btn-g" onclick="render(\'photo\')">Zum Photo Editor</button></div>';
+    window._cPhotoData = null;
+    var finp = document.getElementById('cPhoto');
+    if (finp) {
+      finp.onchange = function (e) {
+        var f = e.target.files && e.target.files[0];
+        if (!f) return;
+        if (f.size > 2.5 * 1024 * 1024) {
+          alert('Bild max. 2.5 MB');
+          return;
+        }
+        var reader = new FileReader();
+        reader.onload = function () {
+          window._cPhotoData = reader.result;
+          var prev = document.getElementById('cPreview');
+          if (prev) {
+            prev.textContent = '';
+            prev.style.backgroundImage = 'url(' + reader.result + ')';
+            prev.style.backgroundSize = 'cover';
+            prev.style.backgroundPosition = 'center';
+          }
+        };
+        reader.readAsDataURL(f);
+      };
+    }
   }
   if (view === 'inbox') {
     const n = store.notifs();
@@ -355,7 +387,10 @@ function renderReal(view) {
       '<div class="h2">Gallery</div>' +
       (g.length
         ? g.map(function (x) {
-            return '<div class="card row"><div class="avatar">' + (x.emoji || '🖼️') + '</div><div><b>' + esc(x.name) + '</b></div></div>';
+            var av = x.photo
+              ? '<div class="avatar" style="background-image:url(' + x.photo + ');background-size:cover;background-position:center"></div>'
+              : '<div class="avatar">' + (x.emoji || '🖼️') + '</div>';
+            return '<div class="card row">' + av + '<div><b>' + esc(x.name) + '</b></div></div>';
           }).join('')
         : '<div class="empty">Leer</div>');
   }
@@ -377,14 +412,96 @@ function renderReal(view) {
       root.innerHTML = '<div class="empty">Kein Dev-Zugriff.</div>';
       return;
     }
+    var f = store.flags();
+    var users = store.users();
+    var chars = store.chars();
     root.innerHTML =
       '<div class="card glass"><div class="h2">Dev Panel</div>' +
-      '<div class="form-g"><label>E-Mail</label><input id="de"></div>' +
-      '<button class="btn btn-p" onclick="devAction(\'dev\')">Zum Dev</button> ' +
-      '<button class="btn btn-g" onclick="devAction(\'nsfw\')">Modus freischalten</button>' +
-      '<div class="form-g" style="margin-top:16px"><label>Rahmen</label><input id="fe">' +
+      '<p class="muted">User: ' + users.length + ' · Chars: ' + chars.length + ' · Adult-Freigaben: ' + ((f.nsfw||[]).length) + '</p>' +
+      '<div class="form-g"><label>E-Mail</label><input id="de" placeholder="user@mail.com"></div>' +
+      '<button class="btn btn-p" onclick="devAction(\'dev\')">Zum Dev machen</button> ' +
+      '<button class="btn btn-g" onclick="devAction(\'nsfw\')">Adult freischalten</button> ' +
+      '<button class="btn btn-g" onclick="devAction(\'unnsfw\')">Adult entziehen</button> ' +
+      '<button class="btn btn-d" onclick="devAction(\'undev\')">Dev entziehen</button>' +
+      '<div class="form-g" style="margin-top:16px"><label>Profilrahmen</label><input id="fe" placeholder="email">' +
       '<select id="ff"><option value="">Kein</option><option value="gold">Gold</option><option value="purple">Lila</option><option value="cyan">Cyan</option></select></div>' +
-      '<button class="btn btn-g" onclick="setFrame()">Setzen</button></div>';
+      '<button class="btn btn-g" onclick="setFrame()">Rahmen setzen</button>' +
+      '<div class="section-title" style="margin-top:20px">Tools</div>' +
+      '<button class="btn btn-g" onclick="devExport()">Export JSON</button> ' +
+      '<button class="btn btn-g" onclick="devImport()">Import JSON</button> ' +
+      '<button class="btn btn-g" onclick="render(\'photo\')">Photo Editor</button> ' +
+      '<button class="btn btn-d" onclick="devWipeChars()">Alle Chars loeschen</button>' +
+      '<div class="section-title" style="margin-top:20px">Adult-Liste</div>' +
+      '<div class="muted">' + esc((f.nsfw||[]).join(', ') || '—') + '</div>' +
+      '<div class="section-title" style="margin-top:12px">Dev-Liste</div>' +
+      '<div class="muted">' + esc([DEV].concat(f.devs||[]).join(', ')) + '</div></div>';
+  }
+  if (view === 'photo') {
+    root.innerHTML =
+      '<div class="card glass"><div class="h2">Photo Editor</div>' +
+      '<p class="muted">Bild laden, anpassen, speichern. Lokal, ohne Server-Moderation.</p>' +
+      '<div class="form-g"><label>Bild</label><input type="file" id="peFile" accept="image/*"></div>' +
+      '<canvas id="peCanvas" style="max-width:100%;border-radius:12px;border:1px solid var(--b);display:none;margin:8px 0"></canvas>' +
+      '<div class="form-g"><label>Helligkeit</label><input type="range" id="peBright" min="50" max="150" value="100"></div>' +
+      '<div class="form-g"><label>Kontrast</label><input type="range" id="peContrast" min="50" max="150" value="100"></div>' +
+      '<div class="form-g"><label>Saettigung</label><input type="range" id="peSat" min="0" max="200" value="100"></div>' +
+      '<div class="form-g"><label>Zoom / Crop</label><input type="range" id="peZoom" min="100" max="200" value="100"></div>' +
+      '<div class="form-g"><label>Schnell-Edit (Text)</label><input id="pePrompt" placeholder="z.B. heller, weicher, dramatisch"></div>' +
+      '<button class="btn btn-g" onclick="peApplyPrompt()">Prompt anwenden</button> ' +
+      '<button class="btn btn-g" onclick="peFlip()">Spiegeln</button> ' +
+      '<button class="btn btn-p" onclick="peSave()">In Gallery speichern</button> ' +
+      '<button class="btn btn-g" onclick="peUseForChar()">Als Charakter-Foto merken</button></div>';
+    window._peImg = null;
+    window._peFlip = false;
+    var peFile = document.getElementById('peFile');
+    function peRedraw() {
+      var canvas = document.getElementById('peCanvas');
+      if (!canvas || !window._peImg) return;
+      var img = window._peImg;
+      var b = (document.getElementById('peBright').value || 100) / 100;
+      var c = (document.getElementById('peContrast').value || 100) / 100;
+      var s = (document.getElementById('peSat').value || 100) / 100;
+      var z = (document.getElementById('peZoom').value || 100) / 100;
+      var maxW = Math.min(560, root.clientWidth - 40);
+      var scale = Math.min(1, maxW / img.width);
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      canvas.style.display = 'block';
+      var ctx = canvas.getContext('2d');
+      ctx.save();
+      ctx.filter = 'brightness(' + b + ') contrast(' + c + ') saturate(' + s + ')';
+      if (window._peFlip) {
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+      }
+      var dw = canvas.width * z;
+      var dh = canvas.height * z;
+      var ox = (canvas.width - dw) / 2;
+      var oy = (canvas.height - dh) / 2;
+      ctx.drawImage(img, ox, oy, dw, dh);
+      ctx.restore();
+    }
+    window._peRedraw = peRedraw;
+    if (peFile) {
+      peFile.onchange = function (e) {
+        var f = e.target.files && e.target.files[0];
+        if (!f) return;
+        var reader = new FileReader();
+        reader.onload = function () {
+          var img = new Image();
+          img.onload = function () {
+            window._peImg = img;
+            peRedraw();
+          };
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(f);
+      };
+    }
+    ['peBright', 'peContrast', 'peSat', 'peZoom'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.oninput = peRedraw;
+    });
   }
   if (view === 'settings') {
     root.innerHTML =
@@ -402,31 +519,38 @@ function renderReal(view) {
   }
   if (view === 'profile' && window._prof) {
     const c = window._prof;
+    var avHtml = c.photo
+      ? '<div class="avatar lg glow" style="margin:0 auto 12px;background-image:url(' + c.photo + ');background-size:cover;background-position:center"></div>'
+      : '<div class="avatar lg glow" style="margin:0 auto 12px">' + (c.emoji || '✨') + '</div>';
     root.innerHTML =
-      '<div style="text-align:center"><div class="avatar lg glow" style="margin:0 auto 12px">' +
-      (c.emoji || '✨') +
-      '</div><div class="h2">' +
-      esc(c.name) +
-      '</div><p class="muted">' +
-      esc(c.short || '') +
-      '</p><button class="btn btn-p" onclick="openChat(\'' +
-      c.id +
-      '\')">Chat</button></div>';
+      '<div style="text-align:center">' + avHtml +
+      '<div class="h2">' + esc(c.name) + '</div>' +
+      '<p class="muted">' + esc(c.short || '') + '</p>' +
+      (c.age ? '<p class="muted">Alter: ' + esc(String(c.age)) + '</p>' : '') +
+      (c.tags ? '<p class="muted">' + esc(c.tags) + '</p>' : '') +
+      '<button class="btn btn-p" onclick="openChat(\'' + c.id + '\')">Chat</button></div>';
   }
 }
 function charCard(c, withProf) {
   const click = withProf
     ? "window._prof=store.chars().find(function(x){return x.id==='" + c.id + "'});render('profile')"
     : "openChat('" + c.id + "')";
+  var avInner = c.photo ? '' : (c.emoji || '✨');
+  var avStyle = c.photo
+    ? ' style="background-image:url(' + c.photo + ');background-size:cover;background-position:center"'
+    : '';
   return (
     '<div class="card row" onclick="' +
     click +
-    '"><div class="avatar">' +
-    (c.emoji || '✨') +
+    '"><div class="avatar"' +
+    avStyle +
+    '>' +
+    avInner +
     '</div><div class="grow"><b>' +
     esc(c.name) +
     '</b><div class="muted">' +
     esc(c.short || c.category || '') +
+    (c.tags ? ' · ' + esc(c.tags) : '') +
     '</div></div></div>'
   );
 }
@@ -437,41 +561,97 @@ function saveChar() {
   const nsfwEl = document.getElementById('cnsfw');
   const nsfw = !!(nsfwEl && nsfwEl.checked);
   const list = store.chars();
+  const photo = window._cPhotoData || null;
   const item = {
     id: 'c' + Date.now(),
     name: name,
     greeting: greeting,
     short: document.getElementById('cs').value.trim(),
     lore: document.getElementById('cl').value.trim(),
+    tags: (document.getElementById('ctags') && document.getElementById('ctags').value.trim()) || '',
+    age: (document.getElementById('cage') && document.getElementById('cage').value) || '',
     category: document.getElementById('cc').value,
     nsfw: nsfw,
     emoji: '✨',
+    photo: photo,
     owner: store.user().email
   };
   list.unshift(item);
   store.setChars(list);
   const g = store.gallery();
-  g.unshift({ name: name, emoji: '✨', note: item.category });
+  g.unshift({ name: name, emoji: '✨', note: item.category, photo: photo });
   store.setGallery(g);
+  window._cPhotoData = null;
   pushNotif('Charakter erstellt', name);
   haptic();
-  alert('Gespeichert');
+  alert('Gespeichert' + (photo ? ' (mit Foto)' : ''));
   render('home');
 }
 function devAction(type) {
   const e = document.getElementById('de').value.trim().toLowerCase();
-  if (!e) return;
+  if (!e) return alert('E-Mail eingeben');
   const f = store.flags();
+  f.devs = f.devs || [];
+  f.nsfw = f.nsfw || [];
   if (type === 'dev') {
-    f.devs = f.devs || [];
     if (f.devs.indexOf(e) < 0) f.devs.push(e);
   }
+  if (type === 'undev') {
+    f.devs = f.devs.filter(function (x) { return x !== e; });
+  }
   if (type === 'nsfw') {
-    f.nsfw = f.nsfw || [];
     if (f.nsfw.indexOf(e) < 0) f.nsfw.push(e);
   }
+  if (type === 'unnsfw') {
+    f.nsfw = f.nsfw.filter(function (x) { return x !== e; });
+  }
   store.setFlags(f);
-  alert('OK');
+  alert('OK: ' + type + ' → ' + e);
+  render('dev');
+}
+function devExport() {
+  var data = {
+    users: store.users(),
+    chars: store.chars(),
+    flags: store.flags(),
+    gallery: store.gallery()
+  };
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'verby-export.json';
+  a.click();
+}
+function devImport() {
+  var inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = 'application/json';
+  inp.onchange = function () {
+    var f = inp.files && inp.files[0];
+    if (!f) return;
+    var r = new FileReader();
+    r.onload = function () {
+      try {
+        var data = JSON.parse(r.result);
+        if (data.users) store.setUsers(data.users);
+        if (data.chars) store.setChars(data.chars);
+        if (data.flags) store.setFlags(data.flags);
+        if (data.gallery) store.setGallery(data.gallery);
+        alert('Import OK');
+        render('dev');
+      } catch (e) {
+        alert('Import fehlgeschlagen');
+      }
+    };
+    r.readAsText(f);
+  };
+  inp.click();
+}
+function devWipeChars() {
+  if (!confirm('Wirklich alle Charaktere loeschen?')) return;
+  store.setChars([]);
+  alert('Chars geloescht');
+  render('dev');
 }
 function setFrame() {
   const e = document.getElementById('fe').value.trim().toLowerCase();
@@ -506,7 +686,15 @@ function openChat(id) {
   ch.classList.add('on');
   ch.style.display = 'flex';
   const av = document.getElementById('cAv');
-  av.textContent = cur.emoji || '✨';
+  if (cur.photo) {
+    av.textContent = '';
+    av.style.backgroundImage = 'url(' + cur.photo + ')';
+    av.style.backgroundSize = 'cover';
+    av.style.backgroundPosition = 'center';
+  } else {
+    av.textContent = cur.emoji || '✨';
+    av.style.backgroundImage = '';
+  }
   av.classList.add('glow');
   document.getElementById('cName').textContent = cur.name;
   document.getElementById('cSub').textContent = cur.short || cur.category || '';
@@ -614,6 +802,47 @@ window.addEventListener('offline', function () {
 if (!navigator.onLine) document.getElementById('offlineBar').classList.add('on');
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(function () {});
+}
+function peApplyPrompt() {
+  var p = (document.getElementById('pePrompt') && document.getElementById('pePrompt').value || '').toLowerCase();
+  if (!p) return alert('Prompt eingeben');
+  var b = document.getElementById('peBright');
+  var c = document.getElementById('peContrast');
+  var s = document.getElementById('peSat');
+  var z = document.getElementById('peZoom');
+  if (/hell|bright|light/.test(p) && b) b.value = Math.min(150, Number(b.value) + 20);
+  if (/dunkel|dark/.test(p) && b) b.value = Math.max(50, Number(b.value) - 20);
+  if (/kontrast|dramatic|drama/.test(p) && c) c.value = Math.min(150, Number(c.value) + 25);
+  if (/weich|soft|pastel/.test(p)) {
+    if (c) c.value = 85;
+    if (s) s.value = 90;
+  }
+  if (/bunt|vibrant|satt/.test(p) && s) s.value = 160;
+  if (/grau|bw|mono/.test(p) && s) s.value = 0;
+  if (/nah|zoom|close/.test(p) && z) z.value = 140;
+  if (window._peRedraw) window._peRedraw();
+  haptic();
+}
+function peFlip() {
+  window._peFlip = !window._peFlip;
+  if (window._peRedraw) window._peRedraw();
+}
+function peSave() {
+  var canvas = document.getElementById('peCanvas');
+  if (!canvas || !window._peImg) return alert('Erst Bild laden');
+  var data = canvas.toDataURL('image/jpeg', 0.88);
+  var g = store.gallery();
+  g.unshift({ name: 'Edit ' + new Date().toLocaleTimeString(), emoji: '🖼️', photo: data, note: 'photo-editor' });
+  store.setGallery(g);
+  pushNotif('Photo Editor', 'Bild in Gallery gespeichert');
+  alert('In Gallery gespeichert');
+}
+function peUseForChar() {
+  var canvas = document.getElementById('peCanvas');
+  if (!canvas || !window._peImg) return alert('Erst Bild laden');
+  window._cPhotoData = canvas.toDataURL('image/jpeg', 0.88);
+  alert('Foto gemerkt – unter Erstellen speichern');
+  render('create');
 }
 function runUpdateScreen(then) {
   const prev = localStorage.getItem('vb_app_version');
