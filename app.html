@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verby App</title>
+<style>
+:root{--bg:#09090b;--s:#111114;--s2:#1a1a22;--b:#2a2a32;--t:#f4f4f5;--m:#a1a1aa;--a:#8b5cf6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font-family:-apple-system,Segoe UI,Roboto,sans-serif;height:100dvh;display:flex;flex-direction:column}
+header{display:flex;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--b);background:var(--s);flex-wrap:wrap}
+.logo{font-weight:800}.logo span{color:var(--a)}
+.nav{display:flex;gap:6px;overflow:auto}
+.nb{border:1px solid var(--b);background:var(--s2);color:var(--m);border-radius:999px;padding:6px 10px;cursor:pointer}
+.nb.on{background:var(--a);color:#fff;border-color:var(--a)}
+.mode{margin-left:auto;font-size:12px;color:var(--m)}
+main{flex:1;overflow:auto;padding:16px}
+.card{max-width:720px;margin:0 auto 12px;background:var(--s);border:1px solid var(--b);border-radius:14px;padding:14px}
+input,textarea,select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--b);background:var(--s2);color:#fff}
+button.p{background:var(--a);color:#fff;border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
+.char{display:flex;gap:10px;align-items:center;cursor:pointer}
+.av{width:48px;height:48px;border-radius:50%;background:var(--s2);display:grid;place-items:center}
+.hidden{display:none}
+#chat{display:none;flex-direction:column;height:100%}
+#msgs{flex:1;overflow:auto;padding:12px}
+.msg{max-width:80%;padding:10px 12px;border-radius:14px;margin:6px 0}
+.me{margin-left:auto;background:#3b3b5c}
+.bot{background:var(--s2);border:1px solid var(--b)}
+.bar{display:flex;gap:8px;padding:10px;border-top:1px solid var(--b)}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Verby<span>.</span></div>
+  <div class="nav">
+    <button class="nb on" data-s="home">Home</button>
+    <button class="nb" data-s="create">Erstellen</button>
+    <button class="nb" data-s="search">Suche</button>
+    <button class="nb" data-s="dev">Dev</button>
+  </div>
+  <div class="mode" id="modeLabel">Modus: Friendly</div>
+  <select id="modeSel"><option value="friendly">Friendly</option><option value="adult">Adult (Coming Soon)</option></select>
+</header>
+<main id="main"></main>
+<div id="chat">
+  <header><button class="nb" id="back">←</button><div id="cname"></div></header>
+  <div id="msgs"></div>
+  <div class="bar"><input id="inp" placeholder="Nachricht..."><button class="p" id="send">Senden</button></div>
+</div>
+<script>
+const DEV='ninofox015@gmail.com';
+const user=JSON.parse(localStorage.getItem('verby_user')||'null');
+if(!user) location.href='login.html';
+const S={
+  get chars(){return JSON.parse(localStorage.getItem('v_chars')||'[]')},
+  set chars(v){localStorage.setItem('v_chars',JSON.stringify(v))},
+  get mode(){return localStorage.getItem('v_mode')||'friendly'},
+  set mode(v){localStorage.setItem('v_mode',v)},
+  get flags(){return JSON.parse(localStorage.getItem('v_flags')||'{}')},
+  set flags(v){localStorage.setItem('v_flags',JSON.stringify(v))}
+};
+const isDev=user.email.toLowerCase()===DEV || (S.flags.devs||[]).includes(user.email.toLowerCase());
+const adultOn=isDev || (S.flags.nsfw||[]).includes(user.email.toLowerCase());
+document.getElementById('modeSel').value=S.mode;
+document.getElementById('modeLabel').textContent='Modus: '+(S.mode==='adult'?'Adult':'Friendly');
+function show(id){
+  document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b.dataset.s===id));
+  document.getElementById('chat').style.display='none';
+  document.getElementById('main').style.display='block';
+  if(id==='home') home();
+  if(id==='create') create();
+  if(id==='search') search();
+  if(id==='dev') dev();
+}
+document.querySelectorAll('.nb[data-s]').forEach(b=>b.onclick=()=>show(b.dataset.s));
+document.getElementById('modeSel').onchange=e=>{
+  if(e.target.value==='adult' && !adultOn){ alert('Adult Version: Coming Soon. Nur Dev-Freigabe.'); e.target.value='friendly'; return; }
+  S.mode=e.target.value; document.getElementById('modeLabel').textContent='Modus: '+(S.mode==='adult'?'Adult':'Friendly'); show('home');
+};
+function visibleChars(){
+  const list=S.chars;
+  if(S.mode==='friendly') return list.filter(c=>!c.nsfw);
+  return list;
+}
+function home(){
+  const list=visibleChars();
+  document.getElementById('main').innerHTML=`<div class="card"><b>Hallo ${user.name}</b><br>${user.email}<br>Modus: ${S.mode}</div>`+
+    (list.length?list.map(c=>`<div class="card char" onclick='openC(${JSON.stringify(c.id)})'><div class="av">${c.emoji||'👤'}</div><div><b>${c.name}</b><div style="color:#a1a1aa;font-size:13px">${c.short||''}</div></div></div>`).join(''):'<div class="card">Noch keine Charaktere.</div>');
+}
+function create(){
+  document.getElementById('main').innerHTML=`<div class="card"><h3>Charakter erstellen</h3>
+  <input id="n" placeholder="Name"><br><br>
+  <textarea id="g" placeholder="Begrüßung"></textarea><br><br>
+  <textarea id="s" placeholder="Kurzbeschreibung"></textarea><br><br>
+  ${S.mode==='adult'?'<label><input type="checkbox" id="nsfw"> Adult-Charakter</label><br><br>':''}
+  <button class="p" id="sv">Speichern</button></div>`;
+  document.getElementById('sv').onclick=()=>{
+    const name=document.getElementById('n').value.trim();
+    const greeting=document.getElementById('g').value.trim();
+    if(!name||!greeting) return alert('Name + Begrüßung');
+    const nsfw=S.mode==='adult' && document.getElementById('nsfw')?.checked;
+    const list=S.chars; list.unshift({id:'c'+Date.now(),name,greeting,short:document.getElementById('s').value.trim(),nsfw:!!nsfw,emoji:'✨'});
+    S.chars=list; alert('Gespeichert'); show('home');
+  };
+}
+function search(){
+  document.getElementById('main').innerHTML=`<div class="card"><input id="q" placeholder="Charakter suchen..."><div id="r"></div></div>`;
+  const run=()=>{
+    const q=document.getElementById('q').value.toLowerCase();
+    const hits=visibleChars().filter(c=>c.name.toLowerCase().includes(q)||(c.short||'').toLowerCase().includes(q));
+    document.getElementById('r').innerHTML=hits.map(c=>`<div class="char" style="margin-top:10px" onclick='openC("${c.id}")'><div class="av">${c.emoji||'👤'}</div><div>${c.name}</div></div>`).join('')||'<p>Nichts gefunden</p>';
+  };
+  document.getElementById('q').oninput=run; run();
+}
+function dev(){
+  if(!isDev){ document.getElementById('main').innerHTML='<div class="card">Kein Zugriff.</div>'; return; }
+  document.getElementById('main').innerHTML=`<div class="card"><h3>Dev Panel</h3>
+  <input id="em" placeholder="E-Mail">
+  <button class="p" id="d1">Zum Dev machen</button>
+  <button class="p" id="d2">Adult freischalten</button></div>`;
+  document.getElementById('d1').onclick=()=>{const f=S.flags; f.devs=f.devs||[]; const e=document.getElementById('em').value.trim().toLowerCase(); if(e&&!f.devs.includes(e)) f.devs.push(e); S.flags=f; alert('OK');};
+  document.getElementById('d2').onclick=()=>{const f=S.flags; f.nsfw=f.nsfw||[]; const e=document.getElementById('em').value.trim().toLowerCase(); if(e&&!f.nsfw.includes(e)) f.nsfw.push(e); S.flags=f; alert('OK');};
+}
+let cur=null;
+window.openC=id=>{
+  cur=S.chars.find(c=>c.id===id); if(!cur) return;
+  document.getElementById('main').style.display='none';
+  document.getElementById('chat').style.display='flex';
+  document.getElementById('cname').textContent=cur.name;
+  document.getElementById('msgs').innerHTML=`<div class="msg bot">${cur.greeting}</div>`;
+};
+document.getElementById('back').onclick=()=>show('home');
+document.getElementById('send').onclick=()=>{
+  const t=document.getElementById('inp').value.trim(); if(!t||!cur) return;
+  document.getElementById('inp').value='';
+  document.getElementById('msgs').innerHTML+=`<div class="msg me">${t}</div><div class="msg bot">*nickt* ${S.mode==='friendly'?'Okay, erzähl weiter.':'Unfiltered – mach weiter.'}</div>`;
+};
+show('home');
+</script>
+</body></html>
