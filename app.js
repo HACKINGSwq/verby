@@ -1,4 +1,10 @@
 const DEV = 'ninofox015@gmail.com';
+const VERBY_OPENAI = {
+  model: 'gpt-4o-mini',
+  url: 'https://api.openai.com/v1/chat/completions',
+  getKey: function () { return localStorage.getItem('vb_openai_key') || ''; },
+  setKey: function (k) { if (k) localStorage.setItem('vb_openai_key', k.trim()); else localStorage.removeItem('vb_openai_key'); }
+};
 const CATS = ['Alle', 'Fantasy', 'Romance', 'Sci-Fi', 'Horror', 'Slice of Life', 'Abenteuer'];
 const store = {
   user: () => JSON.parse(localStorage.getItem('vb_user') || 'null'),
@@ -152,13 +158,11 @@ function ensureForumSeed() {
   if (!data) {
     data = {
       categories: [
-        { id: 'updates', name: 'Updates', desc: 'Offizielle Ankuendigungen und Product-News von Verby Staff.', color: '#ef4444' },
-        { id: 'changelogs', name: 'Changelogs & Functions', desc: 'Jedes Release im Detail: neue Funktionen, Fixes und Verbesserungen.', color: '#f59e0b' },
-        { id: 'community', name: 'Community Discussion', desc: 'Diskussionen, Feedback und Ideen der Community.', color: '#8b5cf6' }
+        { id: 'updates', name: 'Updates', desc: 'Offizielle Ankuendigungen von Verby Staff.', color: '#ef4444' },
+        { id: 'changelogs', name: 'Changelogs & Functions', desc: 'Jedes Release im Detail.', color: '#f59e0b' },
+        { id: 'community', name: 'Community Discussion', desc: 'Feedback und Ideen.', color: '#8b5cf6' }
       ],
-      threads: [],
-      posts: {},
-      seededVersion: null
+      threads: [], posts: {}, seededVersion: null
     };
   }
   var logs = window.VERBY_CHANGELOG || [];
@@ -180,15 +184,11 @@ function ensureForumSeed() {
           });
           data.posts[tid2] = [{
             id: 'p' + now + 'u', author: 'Discobot', bot: true, ts: now,
-            body: 'Hallo Community,\n\nDiscobot meldet: Verby v' + log.v + ' wurde ausgerollt.\n\nKurz:\n' + log.t + '\n\nDetails unter „Changelogs & Functions“.\n\n— Discobot'
+            body: 'Hallo Community,\n\nDiscobot: Verby v' + log.v + ' ist live.\n\n' + log.t + '\n\n— Discobot'
           }];
         }
       }
-      var body = 'Hallo zusammen,\n\nDiscobot veroeffentlicht automatisch diesen Post zu Version ' + log.v + '.\n\n## Zusammenfassung\n' + log.t + '\n\n## Was sich geaendert hat\n' + (log.detail || log.t) + '\n\n';
-      if (log.v === '4.0.0') {
-        body += '## Highlights v4.0.0\n1. Adult-Modus komplett entfernt — nur noch Friendly.\n2. Charakter-Antworten nutzen Memory, Lore, Tags und Chatverlauf.\n3. Neues Verby Forum mit Kategorien.\n4. Discobot schreibt bei jedem Update automatisch Threads.\n5. Photo Editor und Charakter-Fotos bleiben.\n\n';
-      }
-      body += '## Hinweis\nFeedback gerne unter Community Discussion.\n\n— Discobot · Verby System';
+      var body = 'Hallo zusammen,\n\nDiscobot zu Version ' + log.v + '.\n\n## Zusammenfassung\n' + log.t + '\n\n## Details\n' + (log.detail || log.t) + '\n\n— Discobot';
       data.posts[tid] = [{ id: 'p' + now, author: 'Discobot', bot: true, ts: now, body: body }];
     }
   });
@@ -233,7 +233,7 @@ function renderReal(view) {
     root.innerHTML =
       '<div class="card row glass"><div class="avatar ' + frameClass(u) + '">' + (u.name || '?')[0].toUpperCase() +
       '</div><div class="grow"><div class="h2">Hey, ' + esc(u.name) + '</div>' +
-      '<div class="muted">' + esc(u.email || '') + ' · Friendly</div></div></div>' +
+      '<div class="muted">' + esc(u.email || '') + ' · Friendly · OpenAI</div></div></div>' +
       '<div class="section-title">Deine Charaktere</div>' +
       (list.length ? list.map(function (c) { return charCard(c); }).join('') : '<div class="empty">Noch keine Charaktere.</div>');
   }
@@ -257,7 +257,7 @@ function renderReal(view) {
         return '<button class="forum-tab ' + (tab === c.id ? 'on' : '') + '" onclick="window._forumTab=\'' + c.id + '\';render(\'forum\')">' + esc(c.name) + '</button>';
       }).join('') + '</div>';
     if (tab === 'home') {
-      root.innerHTML = '<div class="forum-wrap"><div class="h2">Verby Forum</div><p class="muted" style="margin-bottom:14px">Updates, Changelogs und Community — Discobot postet automatisch.</p>' + tabs +
+      root.innerHTML = '<div class="forum-wrap"><div class="h2">Verby Forum</div><p class="muted" style="margin-bottom:14px">Discobot postet Updates automatisch.</p>' + tabs +
         data.categories.map(function (c) {
           return '<div class="forum-cat"><div class="forum-cat-h"><div><h3>' + esc(c.name) + '</h3><p>' + esc(c.desc) + '</p></div></div>' + renderForumList(c.id) + '</div>';
         }).join('') + '</div>';
@@ -275,11 +275,9 @@ function renderReal(view) {
     root.innerHTML =
       '<button class="btn btn-g" onclick="render(\'forum\')">← Forum</button>' +
       '<h2 style="margin:14px 0 8px;font-size:20px">' + esc(t.title) + '</h2>' +
-      '<p class="muted" style="margin-bottom:16px">' + esc(t.author) + (t.bot ? ' · Discobot' : '') + '</p>' +
       posts.map(function (p) {
         return '<div class="forum-post"><b>' + esc(p.author) + '</b>' +
           (p.bot ? '<span class="bot-badge">BOT</span>' : '') +
-          '<span class="muted" style="margin-left:8px;font-size:12px">' + new Date(p.ts).toLocaleString('de-DE') + '</span>' +
           '<div class="body">' + esc(p.body) + '</div></div>';
       }).join('');
   }
@@ -372,24 +370,28 @@ function renderReal(view) {
   }
   if (view === 'dev') {
     if (!isDev()) { root.innerHTML = '<div class="empty">Kein Dev-Zugriff.</div>'; return; }
-    var f = store.flags();
     root.innerHTML =
       '<div class="card glass"><div class="h2">Dev Panel</div>' +
-      '<p class="muted">Adult-Modus existiert nicht mehr (v4.0).</p>' +
+      '<p class="muted">OpenAI via Settings-Key · Friendly only</p>' +
       '<div class="form-g"><label>E-Mail</label><input id="de"></div>' +
       '<button class="btn btn-p" onclick="devAction(\'dev\')">Zum Dev</button> ' +
       '<button class="btn btn-d" onclick="devAction(\'undev\')">Dev entziehen</button>' +
       '<div class="form-g" style="margin-top:14px"><label>Rahmen</label><input id="fe"><select id="ff"><option value="">Kein</option><option value="gold">Gold</option><option value="purple">Lila</option><option value="cyan">Cyan</option></select></div>' +
       '<button class="btn btn-g" onclick="setFrame()">Setzen</button> ' +
       '<button class="btn btn-g" onclick="devExport()">Export</button> ' +
-      '<button class="btn btn-d" onclick="devWipeChars()">Chars loeschen</button>' +
-      '<p class="muted" style="margin-top:12px">Devs: ' + esc([DEV].concat(f.devs || []).join(', ')) + '</p></div>';
+      '<button class="btn btn-d" onclick="devWipeChars()">Chars loeschen</button></div>';
   }
   if (view === 'settings') {
+    var hasKey = !!VERBY_OPENAI.getKey();
     root.innerHTML =
       '<div class="card glass"><div class="h2">Settings</div><p class="muted">' + esc(u.email || '') + '</p>' +
-      '<p class="muted">Version ' + (window.VERBY_VERSION || '') + ' · Friendly only</p>' +
-      '<button class="btn btn-g" style="width:100%;margin-top:8px" onclick="showPage(\'updates\')">Changelog</button>' +
+      '<p class="muted">Version ' + (window.VERBY_VERSION || '') + ' · ' + (hasKey ? 'OpenAI Key aktiv' : 'OpenAI Key fehlt') + '</p>' +
+      '<div class="form-g" style="margin-top:14px"><label>OpenAI API Key (nur lokal im Browser)</label>' +
+      '<input id="oakey" type="password" placeholder="sk-..." autocomplete="off"></div>' +
+      '<button class="btn btn-p" onclick="saveOpenAIKey()">Key speichern</button> ' +
+      '<button class="btn btn-d" onclick="clearOpenAIKey()">Key loeschen</button>' +
+      '<p class="muted" style="margin-top:10px;font-size:12px">Key wird in localStorage gespeichert, nicht auf dem Server.</p>' +
+      '<button class="btn btn-g" style="width:100%;margin-top:12px" onclick="showPage(\'updates\')">Changelog</button>' +
       '<button class="btn btn-d" style="width:100%;margin-top:12px" onclick="logout()">Logout</button></div>';
   }
   if (view === 'profile' && window._prof) {
@@ -494,7 +496,7 @@ function fmt(t) {
 document.getElementById('chatBack').onclick = function () { enterApp(); };
 document.getElementById('send').onclick = sendMsg;
 document.getElementById('inp').onkeypress = function (e) { if (e.key === 'Enter') sendMsg(); };
-function sendMsg() {
+async function sendMsg() {
   const t = document.getElementById('inp').value.trim();
   if (!t || !cur) return;
   document.getElementById('inp').value = '';
@@ -503,14 +505,58 @@ function sendMsg() {
   hist.push({ role: 'user', text: t });
   document.getElementById('msgs').innerHTML += '<div class="msg me">' + fmt(t) + '</div><div class="typing-dots" id="ty"><span></span><span></span><span></span></div>';
   document.getElementById('msgs').scrollTop = 99999;
-  setTimeout(function () {
-    var ty = document.getElementById('ty'); if (ty) ty.remove();
-    var reply = characterReply(cur, hist, t);
-    hist.push({ role: 'bot', text: reply });
-    store.setChats(cur.id, hist);
-    document.getElementById('msgs').innerHTML += '<div class="msg bot">' + fmt(reply) + '</div>';
-    document.getElementById('msgs').scrollTop = 99999;
-  }, 450 + Math.random() * 400);
+  var reply = '';
+  try {
+    reply = await openaiCharacterReply(cur, hist);
+  } catch (e) {
+    console.warn('OpenAI fallback', e);
+    reply = characterReply(cur, hist, t);
+  }
+  var ty = document.getElementById('ty'); if (ty) ty.remove();
+  hist.push({ role: 'bot', text: reply });
+  store.setChats(cur.id, hist);
+  document.getElementById('msgs').innerHTML += '<div class="msg bot">' + fmt(reply) + '</div>';
+  document.getElementById('msgs').scrollTop = 99999;
+}
+async function openaiCharacterReply(char, hist) {
+  if (!VERBY_OPENAI.getKey()) {
+    throw new Error('Kein OpenAI Key — unter Settings eintragen');
+  }
+  var system =
+    'Du bist der Charakter "' + char.name + '". ' +
+    'Du bleibst IMMER in der Rolle. Antworte natuerlich, lebendig und auf Deutsch (es sei denn der User schreibt anders). ' +
+    'Nutze *Sternchen* fuer Aktionen/Emotes wie in Roleplay-Chats. ' +
+    'Keine Meta-Kommentare, keine Erklaerungen als KI, kein "als KI". ' +
+    'Sei freundlich und sicher (Friendly-Modus) — keine expliziten sexuellen Inhalte.';
+  if (char.short) system += ' Kurzbeschreibung: ' + char.short + '.';
+  if (char.tags) system += ' Persoenlichkeit/Tags: ' + char.tags + '.';
+  if (char.lore) system += ' Memory/Lore (wichtig): ' + char.lore + '.';
+  if (char.greeting) system += ' Deine typische Begruessung war: ' + char.greeting;
+  var messages = [{ role: 'system', content: system }];
+  hist.slice(-16).forEach(function (m) {
+    messages.push({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text });
+  });
+  var res = await fetch(VERBY_OPENAI.url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + VERBY_OPENAI.getKey()
+    },
+    body: JSON.stringify({
+      model: VERBY_OPENAI.model,
+      messages: messages,
+      temperature: 0.85,
+      max_tokens: 400
+    })
+  });
+  if (!res.ok) {
+    var errText = await res.text();
+    throw new Error('OpenAI ' + res.status + ': ' + errText.slice(0, 200));
+  }
+  var data = await res.json();
+  var text = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+  if (!text) throw new Error('Leere Antwort');
+  return text.trim();
 }
 function characterReply(char, hist, userText) {
   var low = userText.toLowerCase();
@@ -523,8 +569,6 @@ function characterReply(char, hist, userText) {
     return buildInVoice(char, lore + (short ? '\n' + short : ''));
   if (/(wer bist|wie heisst|wie heißt)/.test(low))
     return buildInVoice(char, 'Ich bin ' + name + (short ? '. ' + short : '.') + (tags ? ' Man beschreibt mich oft als: ' + char.tags + '.' : ''));
-  if (/(was magst|hobby|interess)/.test(low))
-    return buildInVoice(char, tags ? 'Mich ziehen Dinge an, die zu ' + char.tags + ' passen. Was beschaeftigt dich?' : 'Was beschaeftigt dich gerade?');
   if (hasAct) return reactToAction(char, userText);
   if (/\?/.test(userText)) return answerQuestion(char, userText);
   var lastBot = '';
@@ -536,34 +580,27 @@ function buildInVoice(char, content) {
   if (/trocken|sarkast|dry/.test(tags)) return content.replace(/\.$/, '') + '. Mehr muss man dazu nicht sagen.';
   if (/freundlich|warm|kind/.test(tags)) return '*laechelt*\n' + content;
   if (/mysteri|dunkel|geheim/.test(tags)) return '…' + content;
-  if (/energ|laut|hyper/.test(tags)) return content + '!!';
   return content;
 }
 function reactToAction(char, userText) {
   var act = (userText.match(/\*([^*]+)\*/g) || []).map(function (x) { return x.replace(/\*/g, ''); }).join(', ');
-  var tags = (char.tags || '').toLowerCase();
   var lines = [];
   if (/schlag|slap|hit/i.test(act)) { lines.push('*weicht leicht aus*'); lines.push('Hey — alles gut bei dir?'); }
-  else if (/umarm|hug|hold/i.test(act)) { lines.push('*erwidert die Geste vorsichtig*'); lines.push('Das ist unerwartet. Aber nicht unangenehm.'); }
-  else if (/wink|wave/i.test(act)) { lines.push('*winkt zurueck*'); lines.push('Na, was gibt\'s?'); }
-  else { lines.push('*reagiert auf: ' + act + '*'); lines.push('Ich hab das bemerkt. Was steckt dahinter?'); }
-  if (/schuechtern|shy/.test(tags)) lines[1] = 'Oh… okay. Sag mir, wenn das zu viel war.';
+  else if (/umarm|hug|hold/i.test(act)) { lines.push('*erwidert die Geste vorsichtig*'); lines.push('Das ist unerwartet.'); }
+  else { lines.push('*reagiert auf: ' + act + '*'); lines.push('Ich hab das bemerkt.'); }
   return lines.join('\n');
 }
 function answerQuestion(char, userText) {
-  return buildInVoice(char, 'Gute Frage. Aus meiner Sicht als ' + char.name +
-    (char.short ? ' (' + char.short + ')' : '') + ': Es kommt auf den Kontext an. Was denkst *du* dazu?');
+  return buildInVoice(char, 'Gute Frage. Als ' + char.name + ': Was denkst *du* dazu?');
 }
 function conversationalTurn(char, userText, lastBot) {
   var tags = (char.tags || '').toLowerCase();
   var openers = /freundlich|warm/.test(tags) ? ['Das verstehe ich.', 'Danke, dass du das teilst.']
     : /trocken|sarkast/.test(tags) ? ['Interessant.', 'Okay, notiert.']
-    : /neugier/.test(tags) ? ['Oh?', 'Was steckt dahinter —']
     : ['Mhm.', 'Ich hoere.'];
   var opener = openers[Math.floor(Math.random() * openers.length)];
-  var follow = ['Was bedeutet das fuer dich gerade?', 'Wie fuehlt sich das an?', 'Und was kommt als Naechstes?', 'Welcher Teil beschaeftigt dich am meisten?'];
+  var follow = ['Was bedeutet das fuer dich?', 'Wie fuehlt sich das an?', 'Und was kommt als Naechstes?'];
   var pick = follow[Math.floor(Math.random() * follow.length)];
-  if (lastBot && lastBot.indexOf(pick.slice(0, 12)) >= 0) pick = follow[(follow.indexOf(pick) + 1) % follow.length];
   var words = userText.split(/\s+/).filter(function (w) { return w.length > 4; }).slice(0, 3);
   var ref = words.length ? ' Du hast „' + words.join(' ') + '“ angesprochen — ' : ' ';
   return buildInVoice(char, opener + ref + pick);
@@ -589,6 +626,18 @@ window.addEventListener('online', function () { document.getElementById('offline
 window.addEventListener('offline', function () { document.getElementById('offlineBar').classList.add('on'); });
 if (!navigator.onLine) document.getElementById('offlineBar').classList.add('on');
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
+function saveOpenAIKey() {
+  var k = document.getElementById('oakey').value.trim();
+  if (!k || k.indexOf('sk-') !== 0) return alert('Gueltigen OpenAI Key einfuegen (sk-...)');
+  VERBY_OPENAI.setKey(k);
+  alert('Key gespeichert (nur in diesem Browser)');
+  render('settings');
+}
+function clearOpenAIKey() {
+  VERBY_OPENAI.setKey('');
+  alert('Key geloescht');
+  render('settings');
+}
 function runUpdateScreen(then) {
   const prev = localStorage.getItem('vb_app_version');
   const ver = window.VERBY_VERSION || '0';
