@@ -12,96 +12,97 @@ window.VERBY_SB = {
   url: 'https://urejdjknivskplofkckd.supabase.co',
   key: 'sb_publishable_TdfBrmzeodFFqZiwCf9Gnw_R4-hHxa2'
 };
-window.VERBY_VERSION = '3.4.0';
+window.VERBY_VERSION = '4.0.0';
 window.VERBY_CHANGELOG = [
-  { v: '3.4.0', t: 'Photo Editor, Charakter-Foto beim Erstellen, erweitertes Dev-Panel' },
-  { v: '3.3.0', t: 'Echte OAuth (Google, GitHub, Apple) via Supabase, Update-Loading-Screen, kein Demo-Login mehr' },
-  { v: '3.2.0', t: 'Supabase Auth E-Mail/Passwort, Desktop-Layout, Session-Restore' },
-  { v: '3.1.0', t: 'Desktop-Optimierung, Theme-Packs, PWA' },
-  { v: '3.0.0', t: 'Explore 2.0, Community, Inbox, Gallery, Safety, Offline, Chat-Suche, *Aktionen*' },
-  { v: '2.0.0', t: 'Premium Design, Dev-Panel, Accounts, Memory' },
-  { v: '0.1.0', t: 'Erster Launch auf Vercel' }
+  {
+    v: '4.0.0',
+    t: 'Adult entfernt · echte Charakter-KI · Verby Forum · Discobot Auto-Posts',
+    detail: 'Mit Version 4.0.0 wird der Adult-Modus vollständig entfernt. Verby ist ab sofort ausschließlich Friendly. Charaktere antworten kontextbezogen über Memory, Lore, Tags und Chat-Verlauf statt mit generischen Füllsätzen. Neu ist das Verby Forum im Stil großer Community-Foren: Kategorien, Threads, automatische Update-Posts durch Discobot. Jedes Release erzeugt unter „Changelogs & Functions“ einen ausführlichen Thread mit allen Änderungen.'
+  },
+  {
+    v: '3.4.0',
+    t: 'Photo Editor, Charakter-Foto, erweitertes Dev-Panel',
+    detail: 'Photo Editor mit Helligkeit, Kontrast, Sättigung, Zoom und Text-Prompts. Charakter-Erstellung mit Profilbild. Dev-Panel mit Export/Import und Freigaben.'
+  },
+  {
+    v: '3.3.0',
+    t: 'Echte OAuth und Update-Loading-Screen',
+    detail: 'Google, GitHub und Apple über Supabase. Schwarzer Update-Screen mit Ladebalken bei neuer Version.'
+  },
+  {
+    v: '3.0.0',
+    t: 'Explore 2.0, Community, Gallery, PWA',
+    detail: 'Explore mit Kategorien, Community-Profile, Gallery, Offline-Hinweis und Chat-Suche.'
+  }
 ];
 </script>
 <style>
-:root,[data-theme="midnight"]{--bg:#07070a;--s:rgba(18,18,24,.82);--s2:#14141c;--s3:#1c1c26;--b:rgba(255,255,255,.08);--t:#f5f5f7;--m:#8e8ea0;--a:#8b5cf6;--a2:#a78bfa;--glass:rgba(255,255,255,.045);--danger:#ef4444;--user:#4c3d8a;--glow:rgba(139,92,246,.45)}
-[data-theme="neon"]{--bg:#050510;--s:rgba(12,12,28,.88);--s2:#0e0e22;--s3:#16163a;--b:rgba(0,255,200,.12);--t:#e8fff8;--m:#7a9e96;--a:#22d3ee;--a2:#67e8f9;--glass:rgba(34,211,238,.06);--user:#0e4a5c;--glow:rgba(34,211,238,.4)}
-[data-theme="soft"]{--bg:#0f0e14;--s:rgba(28,24,36,.9);--s2:#1a1722;--s3:#252030;--b:rgba(255,200,220,.1);--t:#faf5ff;--m:#a89bb0;--a:#e879f9;--a2:#f0abfc;--glass:rgba(232,121,249,.06);--user:#5b3a6e;--glow:rgba(232,121,249,.4)}
+:root,[data-theme="midnight"]{--bg:#0b0b0f;--s:rgba(22,22,30,.9);--s2:#16161f;--s3:#1e1e28;--b:rgba(255,255,255,.08);--t:#f3f3f5;--m:#8b8b9a;--a:#8b5cf6;--a2:#a78bfa;--glass:rgba(255,255,255,.04);--danger:#ef4444;--user:#4c3d8a;--glow:rgba(139,92,246,.4);--forum:#12141a;--forum-row:#161922;--forum-border:#252833;--link:#5b9dff}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg);color:var(--t);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
 body{display:flex;flex-direction:column;min-height:100dvh;overflow:hidden}
-body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -15%,var(--glow),transparent 60%);pointer-events:none;z-index:0}
-#updateOverlay{position:fixed;inset:0;z-index:99999;background:#000;display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse 80% 45% at 50% -10%,var(--glow),transparent 55%);pointer-events:none;z-index:0}
+#updateOverlay{position:fixed;inset:0;z-index:99999;background:#000;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px}
 #updateOverlay.on{display:flex}
-#updateOverlay .ut{font-size:18px;font-weight:650;letter-spacing:.3px;color:#fff}
+#updateOverlay .ut{font-size:18px;font-weight:650;color:#fff}
 #updateOverlay .us{font-size:13px;color:#888}
 #updateBarWrap{width:min(280px,70vw);height:6px;background:#222;border-radius:99px;overflow:hidden}
-#updateBar{height:100%;width:0%;background:linear-gradient(90deg,#8b5cf6,#a78bfa);border-radius:99px;transition:width .25s linear}
-.screen{display:none;flex:1;overflow:auto;-webkit-overflow-scrolling:touch;position:relative;z-index:1}
-.screen.on{display:block;animation:pageIn .32s cubic-bezier(.22,1,.36,1)}
-@keyframes pageIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-@keyframes glowPulse{0%,100%{box-shadow:0 0 0 0 var(--glow)}50%{box-shadow:0 0 0 6px transparent,0 0 20px var(--glow)}}
+#updateBar{height:100%;width:0%;background:linear-gradient(90deg,#8b5cf6,#a78bfa);transition:width .2s linear}
+.screen{display:none;flex:1;overflow:auto;position:relative;z-index:1}
+.screen.on{display:block;animation:pageIn .3s ease}
+@keyframes pageIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 0 0 var(--glow)}50%{box-shadow:0 0 0 6px transparent}}
 @keyframes dot{0%,80%,100%{opacity:.25}40%{opacity:1}}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.glass{background:var(--s);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);border:1px solid var(--b)}
-.btn{border:0;border-radius:14px;padding:12px 18px;font-weight:650;cursor:pointer;font-size:14px;transition:transform .12s}
-.btn:active{transform:scale(.96)}
-.btn-p{background:linear-gradient(135deg,var(--a),#6d28d9);color:#fff;box-shadow:0 8px 24px var(--glow)}
+.glass{background:var(--s);backdrop-filter:blur(20px);border:1px solid var(--b)}
+.btn{border:0;border-radius:12px;padding:11px 16px;font-weight:650;cursor:pointer;font-size:14px}
+.btn:active{transform:scale(.97)}
+.btn-p{background:linear-gradient(135deg,var(--a),#6d28d9);color:#fff}
 .btn-g{background:var(--s2);color:var(--t);border:1px solid var(--b)}
-.btn-d{background:transparent;color:var(--danger);border:1px solid rgba(239,68,68,.3)}
-input,textarea,select{width:100%;padding:13px 15px;border-radius:14px;border:1px solid var(--b);background:var(--s2);color:var(--t);font-size:15px;outline:none}
+.btn-d{background:transparent;color:var(--danger);border:1px solid rgba(239,68,68,.35)}
+input,textarea,select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--b);background:var(--s2);color:var(--t);font-size:15px;outline:none}
 input:focus,textarea:focus{border-color:var(--a)}
-textarea{min-height:88px;resize:vertical}
-.avatar{width:56px;height:56px;border-radius:50%;background:var(--s3);display:grid;place-items:center;font-size:24px;overflow:hidden;flex-shrink:0;border:2px solid var(--b);background-size:cover;background-position:center}
-.avatar.lg{width:100px;height:100px;font-size:42px}
+textarea{min-height:84px;resize:vertical}
+.avatar{width:52px;height:52px;border-radius:50%;background:var(--s3);display:grid;place-items:center;font-size:22px;overflow:hidden;flex-shrink:0;border:2px solid var(--b);background-size:cover;background-position:center}
+.avatar.lg{width:96px;height:96px;font-size:40px}
 .avatar.glow{animation:glowPulse 2s ease-in-out infinite}
-.avatar.frame-gold{box-shadow:0 0 0 3px #fbbf24,0 0 16px rgba(251,191,36,.4)}
-.avatar.frame-purple{box-shadow:0 0 0 3px #a78bfa,0 0 16px rgba(167,139,250,.4)}
-.avatar.frame-cyan{box-shadow:0 0 0 3px #22d3ee,0 0 16px rgba(34,211,238,.35)}
-.card{background:var(--s);border:1px solid var(--b);border-radius:18px;padding:16px;margin-bottom:12px;transition:border-color .2s,transform .15s}
-.card:hover{border-color:rgba(139,92,246,.35)}
-.skel{background:linear-gradient(90deg,var(--s2) 25%,var(--s3) 50%,var(--s2) 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:12px}
-.skel-card{height:72px;margin-bottom:12px}
+.card{background:var(--s);border:1px solid var(--b);border-radius:16px;padding:14px;margin-bottom:10px}
+.skel{background:linear-gradient(90deg,var(--s2) 25%,var(--s3) 50%,var(--s2) 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:12px;height:68px;margin-bottom:10px}
 #landing{padding:24px 20px 80px;max-width:1040px;margin:0 auto}
-.nav-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:48px;flex-wrap:wrap;gap:10px}
-.logo{font-size:22px;font-weight:800;letter-spacing:-.5px}.logo span{color:var(--a)}
-.hero h1{font-size:clamp(34px,6vw,52px);line-height:1.06;margin:16px 0 12px;letter-spacing:-1.2px}
-.hero p{color:var(--m);font-size:17px;max-width:540px;line-height:1.5}
-.hero-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
-.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:40px}
-.feat{padding:18px;border-radius:16px;background:var(--glass);border:1px solid var(--b)}
-.feat h3{font-size:15px;margin-bottom:6px}.feat p{font-size:13px;color:var(--m);line-height:1.4}
+.nav-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:40px;flex-wrap:wrap;gap:10px}
+.logo{font-size:22px;font-weight:800}.logo span{color:var(--a)}
+.hero h1{font-size:clamp(32px,5.5vw,48px);line-height:1.08;margin:14px 0 10px}
+.hero p{color:var(--m);font-size:16px;max-width:520px}
+.hero-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:36px}
+.feat{padding:16px;border-radius:14px;background:var(--glass);border:1px solid var(--b)}
+.feat h3{font-size:14px;margin-bottom:6px}.feat p{font-size:12px;color:var(--m)}
 .badge{display:inline-block;font-size:11px;padding:4px 10px;border-radius:999px;background:rgba(139,92,246,.2);color:var(--a2);font-weight:600}
 #auth{display:none;place-items:center;padding:24px;min-height:100dvh}#auth.on{display:grid}
-.auth-box{width:min(400px,100%);padding:28px;border-radius:22px}
-.oauth{display:block;width:100%;padding:13px;border-radius:14px;border:1px solid var(--b);background:var(--s2);color:var(--t);text-align:center;font-weight:600;margin-top:8px;cursor:pointer}
-.oauth:hover{border-color:var(--a)}
+.auth-box{width:min(400px,100%);padding:26px;border-radius:20px}
+.oauth{display:block;width:100%;padding:12px;border-radius:12px;border:1px solid var(--b);background:var(--s2);color:var(--t);text-align:center;font-weight:600;margin-top:8px;cursor:pointer}
 #app{display:none;flex-direction:column;height:100dvh}#app.on{display:flex}
-.app-header{display:flex;align-items:center;gap:8px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));border-bottom:1px solid var(--b);background:rgba(7,7,10,.75);backdrop-filter:blur(20px);z-index:10;flex-shrink:0}
+.app-header{display:flex;align-items:center;gap:8px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));border-bottom:1px solid var(--b);background:rgba(11,11,15,.85);backdrop-filter:blur(16px);z-index:10;flex-shrink:0}
 .app-nav{display:flex;gap:4px;overflow-x:auto;flex:1;scrollbar-width:none}
 .app-nav::-webkit-scrollbar{display:none}
-.nb{padding:8px 12px;border-radius:999px;border:1px solid transparent;background:transparent;color:var(--m);font-size:13px;cursor:pointer;white-space:nowrap}
+.nb{padding:8px 11px;border-radius:999px;border:1px solid transparent;background:transparent;color:var(--m);font-size:13px;cursor:pointer;white-space:nowrap}
 .nb.on{background:rgba(139,92,246,.18);color:var(--a2);border-color:rgba(139,92,246,.28)}
-.mode-pill{font-size:11px;padding:5px 10px;border-radius:999px;background:var(--s2);border:1px solid var(--b);color:var(--m)}
-.mode-pill.adult{background:rgba(239,68,68,.12);color:#fca5a5;border-color:rgba(239,68,68,.25)}
-#view{flex:1;overflow:auto;padding:16px;padding-bottom:max(20px,env(safe-area-inset-bottom));max-width:900px;margin:0 auto;width:100%}
+#view{flex:1;overflow:auto;padding:16px;max-width:960px;margin:0 auto;width:100%}
 #chat{display:none;flex-direction:column;height:100dvh}#chat.on{display:flex}
-#msgs{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:8px;max-width:900px;margin:0 auto;width:100%}
-.msg{max-width:min(85%,560px);padding:12px 15px;border-radius:18px;line-height:1.5;font-size:15px;white-space:pre-wrap;word-break:break-word;animation:fadeIn .25s ease}
-.msg.me{align-self:flex-end;background:linear-gradient(135deg,var(--user),#2f2f4a);border-bottom-right-radius:6px}
-.msg.bot{align-self:flex-start;background:var(--s2);border:1px solid var(--b);border-bottom-left-radius:6px}
+#msgs{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:8px;max-width:960px;margin:0 auto;width:100%}
+.msg{max-width:min(86%,560px);padding:11px 14px;border-radius:16px;line-height:1.5;font-size:15px;white-space:pre-wrap;word-break:break-word;animation:fadeIn .22s ease}
+.msg.me{align-self:flex-end;background:linear-gradient(135deg,var(--user),#2f2f4a);border-bottom-right-radius:5px}
+.msg.bot{align-self:flex-start;background:var(--s2);border:1px solid var(--b);border-bottom-left-radius:5px}
 .msg .act{color:var(--a2);font-style:italic}
-.msg.hit{outline:2px solid var(--a)}
-.chat-bar{display:flex;gap:8px;padding:10px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom));border-top:1px solid var(--b);background:rgba(7,7,10,.92);max-width:900px;margin:0 auto;width:100%}
-.chat-bar input{flex:1;border-radius:24px}
-.chat-bar button{width:46px;height:46px;border-radius:50%;border:0;background:var(--a);color:#fff;font-size:16px;cursor:pointer;flex-shrink:0}
-.typing-dots{display:inline-flex;gap:5px;align-items:center;padding:12px 16px;background:var(--s2);border:1px solid var(--b);border-radius:16px;align-self:flex-start}
+.chat-bar{display:flex;gap:8px;padding:10px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom));border-top:1px solid var(--b);background:rgba(11,11,15,.92);max-width:960px;margin:0 auto;width:100%}
+.chat-bar input{flex:1;border-radius:22px}
+.chat-bar button{width:44px;height:44px;border-radius:50%;border:0;background:var(--a);color:#fff;cursor:pointer;flex-shrink:0}
+.typing-dots{display:inline-flex;gap:5px;padding:12px 14px;background:var(--s2);border:1px solid var(--b);border-radius:14px;align-self:flex-start}
 .typing-dots span{width:7px;height:7px;border-radius:50%;background:var(--m);animation:dot 1.2s infinite}
-.typing-dots span:nth-child(2){animation-delay:.15s}
-.typing-dots span:nth-child(3){animation-delay:.3s}
-.section-title{font-size:12px;color:var(--m);text-transform:uppercase;letter-spacing:.6px;margin:8px 0 12px;font-weight:600}
-.empty{text-align:center;color:var(--m);padding:40px 20px}
+.typing-dots span:nth-child(2){animation-delay:.15s}.typing-dots span:nth-child(3){animation-delay:.3s}
+.section-title{font-size:12px;color:var(--m);text-transform:uppercase;letter-spacing:.5px;margin:8px 0 10px;font-weight:600}
+.empty{text-align:center;color:var(--m);padding:36px 16px}
 .row{display:flex;gap:12px;align-items:center}
 .grow{flex:1;min-width:0}
 .muted{color:var(--m);font-size:13px}
@@ -110,19 +111,32 @@ textarea{min-height:88px;resize:vertical}
 .form-g label{display:block;font-size:12px;color:var(--m);margin-bottom:6px}
 .offline-bar{display:none;background:#3b1d1d;color:#fecaca;text-align:center;padding:8px;font-size:13px;z-index:20}
 .offline-bar.on{display:block}
-.cat-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}
-.cat{padding:8px 14px;border-radius:999px;border:1px solid var(--b);background:var(--s2);color:var(--m);font-size:13px;cursor:pointer;white-space:nowrap}
-.cat.on{background:rgba(139,92,246,.2);color:var(--a2);border-color:rgba(139,92,246,.35)}
-.notif{border-left:3px solid var(--a);padding-left:12px}
+.cat-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px}
+.cat{padding:8px 12px;border-radius:999px;border:1px solid var(--b);background:var(--s2);color:var(--m);font-size:13px;cursor:pointer;white-space:nowrap}
+.cat.on{background:rgba(139,92,246,.2);color:var(--a2)}
+.forum-wrap{max-width:1100px;margin:0 auto}
+.forum-tabs{display:flex;gap:4px;border-bottom:1px solid var(--forum-border);margin-bottom:16px;overflow-x:auto}
+.forum-tab{padding:10px 14px;color:var(--m);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;font-size:14px;background:none;border-top:0;border-left:0;border-right:0}
+.forum-tab.on{color:var(--t);border-bottom-color:var(--a)}
+.forum-cat{border:1px solid var(--forum-border);border-radius:10px;overflow:hidden;margin-bottom:14px;background:var(--forum)}
+.forum-cat-h{display:flex;justify-content:space-between;align-items:flex-start;padding:14px 16px;background:var(--forum-row);border-bottom:1px solid var(--forum-border);gap:12px}
+.forum-cat-h h3{font-size:16px;font-weight:700}
+.forum-cat-h p{font-size:13px;color:var(--m);margin-top:4px;line-height:1.4}
+.forum-thread{display:flex;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--forum-border);cursor:pointer;align-items:center}
+.forum-thread:last-child{border-bottom:0}
+.forum-thread:hover{background:rgba(255,255,255,.03)}
+.forum-thread .tt{color:var(--link);font-weight:600;font-size:14px}
+.forum-thread .meta{font-size:12px;color:var(--m);white-space:nowrap}
+.forum-post{background:var(--forum-row);border:1px solid var(--forum-border);border-radius:10px;padding:16px;margin-bottom:12px}
+.forum-post .bot-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:6px;background:rgba(91,157,255,.2);color:var(--link);font-weight:700;margin-left:6px}
+.forum-post .body{margin-top:10px;line-height:1.55;font-size:14px;white-space:pre-wrap}
+.tag-pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:4px;margin-right:4px;background:rgba(255,255,255,.06);color:var(--m)}
 @media(min-width:900px){
-  #landing{padding:40px 48px 100px;max-width:1100px}
-  .hero h1{font-size:56px}
-  .feat-grid{grid-template-columns:repeat(4,1fr);gap:16px}
-  .app-header{padding:12px 32px}
-  #view{padding:28px 40px;max-width:960px}
-  #msgs,.chat-bar{padding-left:40px;padding-right:40px;max-width:960px}
-  .msg{max-width:62%}
-  .auth-box{width:420px;padding:36px}
+  #landing{padding:40px 48px 90px}
+  .hero h1{font-size:52px}
+  .app-header{padding:12px 28px}
+  #view{padding:24px 32px}
+  #msgs,.chat-bar{padding-left:32px;padding-right:32px}
 }
 </style>
 </head>
@@ -130,47 +144,42 @@ textarea{min-height:88px;resize:vertical}
 <div id="updateOverlay">
   <div class="ut">Update Loads...</div>
   <div id="updateBarWrap"><div id="updateBar"></div></div>
-  <div class="us" id="updateSub">v3.4.0 wird geladen</div>
+  <div class="us" id="updateSub">v4.0.0 wird geladen</div>
 </div>
-<div class="offline-bar" id="offlineBar">Offline-Modus aktiv · lokale Chats verfuegbar</div>
+<div class="offline-bar" id="offlineBar">Offline-Modus aktiv</div>
 <div id="landing" class="screen on">
   <div class="nav-top">
     <div class="logo">Verby<span>.</span></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-g" onclick="showPage('roadmap')">Roadmap</button>
-      <button class="btn btn-g" onclick="showPage('about')">Unternehmen</button>
+      <button class="btn btn-g" onclick="showPage('updates')">Changelog</button>
       <button class="btn btn-p" onclick="goAuth()">Login</button>
     </div>
   </div>
   <div class="hero">
-    <span class="badge">v3.4 · Photo Editor</span>
-    <h1>Charaktere.<br>Chats. Deine Welt.</h1>
-    <p>Premium Character-Chat mit Photo Editor, Charakter-Fotos und Google-Login.</p>
+    <span class="badge">v4.0 · Nur Friendly · Forum</span>
+    <h1>Charaktere.<br>Forum. Deine Welt.</h1>
+    <p>Friendly Character-Chat mit besserer KI, Photo Editor und Verby Forum mit automatischen Update-Posts.</p>
     <div class="hero-btns">
       <button class="btn btn-p" onclick="goAuth()">Anmelden</button>
-      <button class="btn btn-g" onclick="showPage('updates')">Changelog</button>
-      <button class="btn btn-g" onclick="showPage('safety')">Safety</button>
+      <button class="btn btn-g" onclick="showPage('updates')">Was ist neu</button>
     </div>
   </div>
   <div class="feat-grid">
-    <div class="feat"><h3>Photo Editor</h3><p>Bilder bearbeiten und speichern.</p></div>
-    <div class="feat"><h3>Charakter-Fotos</h3><p>Profilbild beim Erstellen.</p></div>
-    <div class="feat"><h3>Dev Panel</h3><p>Freigaben, Export, Tools.</p></div>
-    <div class="feat"><h3>Supabase</h3><p>Echte Online-Accounts.</p></div>
+    <div class="feat"><h3>Nur Friendly</h3><p>Adult-Modus komplett entfernt.</p></div>
+    <div class="feat"><h3>Bessere KI</h3><p>Kontext, Memory und echte Antworten.</p></div>
+    <div class="feat"><h3>Verby Forum</h3><p>Updates & Changelogs wie bei großen Foren.</p></div>
+    <div class="feat"><h3>Discobot</h3><p>Automatische Posts bei jedem Update.</p></div>
   </div>
 </div>
 <div id="auth" class="screen">
   <div class="auth-box glass">
     <div class="logo" style="text-align:center;margin-bottom:8px">Verby<span>.</span></div>
-    <p class="muted" style="text-align:center;margin-bottom:18px">Echter Login mit Supabase</p>
+    <p class="muted" style="text-align:center;margin-bottom:16px">Login mit Supabase</p>
     <div class="form-g"><label>E-Mail</label><input id="a-email" type="email" placeholder="name@mail.com"></div>
     <div class="form-g"><label>Name</label><input id="a-name" placeholder="Dein Name"></div>
-    <div class="form-g"><label>Passwort (min. 6)</label><input id="a-pass" type="password" placeholder="••••••••"></div>
+    <div class="form-g"><label>Passwort (min. 6)</label><input id="a-pass" type="password"></div>
     <button class="btn btn-p" style="width:100%;margin-top:8px" onclick="loginEmail()">Mit E-Mail fortfahren</button>
     <button class="oauth" onclick="oauthLogin('google')">Weiter mit Google</button>
-    <button class="oauth" onclick="oauthLogin('github')">Weiter mit GitHub</button>
-    <button class="oauth" onclick="oauthLogin('apple')">Weiter mit Apple</button>
-    <p class="muted" style="font-size:11px;margin-top:14px;line-height:1.4">Google in Supabase Providers aktivieren (Client ID + Secret).</p>
     <p style="text-align:center;margin-top:12px"><a href="#" onclick="showLanding();return false" style="color:var(--a2)">Zurueck</a></p>
   </div>
 </div>
@@ -180,16 +189,14 @@ textarea{min-height:88px;resize:vertical}
     <div class="app-nav">
       <button class="nb on" data-v="home">Home</button>
       <button class="nb" data-v="explore">Explore</button>
-      <button class="nb" data-v="community">Community</button>
+      <button class="nb" data-v="forum">Forum</button>
       <button class="nb" data-v="create">Erstellen</button>
-      <button class="nb" data-v="inbox">Inbox</button>
-      <button class="nb" data-v="gallery">Gallery</button>
       <button class="nb" data-v="photo">Photo</button>
-      <button class="nb" data-v="search">Suche</button>
+      <button class="nb" data-v="gallery">Gallery</button>
+      <button class="nb" data-v="inbox">Inbox</button>
       <button class="nb" data-v="dev">Dev</button>
       <button class="nb" data-v="settings">Settings</button>
     </div>
-    <div class="mode-pill" id="modePill">Friendly</div>
   </div>
   <div id="view"></div>
 </div>
@@ -201,9 +208,7 @@ textarea{min-height:88px;resize:vertical}
       <div id="cName" style="font-weight:650;font-size:14px"></div>
       <div class="muted" id="cSub" style="font-size:11px"></div>
     </div>
-    <button class="nb" id="chatSearchBtn">🔍</button>
   </div>
-  <div id="chatSearchBar" style="display:none;padding:8px 12px;border-bottom:1px solid var(--b)"><input id="chatQ" placeholder="Im Chat suchen..."></div>
   <div id="msgs"></div>
   <div class="chat-bar">
     <input id="inp" placeholder="Nachricht oder *aktion*..." autocomplete="off">
