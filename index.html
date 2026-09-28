@@ -12,27 +12,27 @@ window.VERBY_SB = {
   url: 'https://urejdjknivskplofkckd.supabase.co',
   key: 'sb_publishable_TdfBrmzeodFFqZiwCf9Gnw_R4-hHxa2'
 };
-window.VERBY_VERSION = '4.0.0';
+window.VERBY_VERSION = '4.1.0';
 window.VERBY_CHANGELOG = [
   {
+    v: '4.1.0',
+    t: 'Echte OpenAI Charakter-KI (gpt-4o-mini)',
+    detail: 'Charaktere antworten ueber die OpenAI API mit System-Prompt aus Name, Tags, Lore und Chatverlauf. Lokaler Fallback bei API-Fehlern. Friendly-only bleibt.'
+  },
+  {
     v: '4.0.0',
-    t: 'Adult entfernt · echte Charakter-KI · Verby Forum · Discobot Auto-Posts',
-    detail: 'Mit Version 4.0.0 wird der Adult-Modus vollständig entfernt. Verby ist ab sofort ausschließlich Friendly. Charaktere antworten kontextbezogen über Memory, Lore, Tags und Chat-Verlauf statt mit generischen Füllsätzen. Neu ist das Verby Forum im Stil großer Community-Foren: Kategorien, Threads, automatische Update-Posts durch Discobot. Jedes Release erzeugt unter „Changelogs & Functions“ einen ausführlichen Thread mit allen Änderungen.'
+    t: 'Adult entfernt · Verby Forum · Discobot Auto-Posts',
+    detail: 'Adult-Modus entfernt. Forum mit Updates, Changelogs & Functions, Community. Discobot postet automatisch.'
   },
   {
     v: '3.4.0',
-    t: 'Photo Editor, Charakter-Foto, erweitertes Dev-Panel',
-    detail: 'Photo Editor mit Helligkeit, Kontrast, Sättigung, Zoom und Text-Prompts. Charakter-Erstellung mit Profilbild. Dev-Panel mit Export/Import und Freigaben.'
+    t: 'Photo Editor, Charakter-Foto, Dev-Panel',
+    detail: 'Photo Editor und Charakter-Profilbilder.'
   },
   {
     v: '3.3.0',
-    t: 'Echte OAuth und Update-Loading-Screen',
-    detail: 'Google, GitHub und Apple über Supabase. Schwarzer Update-Screen mit Ladebalken bei neuer Version.'
-  },
-  {
-    v: '3.0.0',
-    t: 'Explore 2.0, Community, Gallery, PWA',
-    detail: 'Explore mit Kategorien, Community-Profile, Gallery, Offline-Hinweis und Chat-Suche.'
+    t: 'OAuth und Update-Loading-Screen',
+    detail: 'Google Login und Update-Screen.'
   }
 ];
 </script>
@@ -144,7 +144,7 @@ textarea{min-height:84px;resize:vertical}
 <div id="updateOverlay">
   <div class="ut">Update Loads...</div>
   <div id="updateBarWrap"><div id="updateBar"></div></div>
-  <div class="us" id="updateSub">v4.0.0 wird geladen</div>
+  <div class="us" id="updateSub">v4.1.0 wird geladen</div>
 </div>
 <div class="offline-bar" id="offlineBar">Offline-Modus aktiv</div>
 <div id="landing" class="screen on">
@@ -156,19 +156,19 @@ textarea{min-height:84px;resize:vertical}
     </div>
   </div>
   <div class="hero">
-    <span class="badge">v4.0 · Nur Friendly · Forum</span>
+    <span class="badge">v4.1 · OpenAI Charakter-KI</span>
     <h1>Charaktere.<br>Forum. Deine Welt.</h1>
-    <p>Friendly Character-Chat mit besserer KI, Photo Editor und Verby Forum mit automatischen Update-Posts.</p>
+    <p>Friendly Character-Chat mit echter OpenAI-KI, Forum und Photo Editor.</p>
     <div class="hero-btns">
       <button class="btn btn-p" onclick="goAuth()">Anmelden</button>
       <button class="btn btn-g" onclick="showPage('updates')">Was ist neu</button>
     </div>
   </div>
   <div class="feat-grid">
-    <div class="feat"><h3>Nur Friendly</h3><p>Adult-Modus komplett entfernt.</p></div>
-    <div class="feat"><h3>Bessere KI</h3><p>Kontext, Memory und echte Antworten.</p></div>
-    <div class="feat"><h3>Verby Forum</h3><p>Updates & Changelogs wie bei großen Foren.</p></div>
-    <div class="feat"><h3>Discobot</h3><p>Automatische Posts bei jedem Update.</p></div>
+    <div class="feat"><h3>OpenAI KI</h3><p>Echte Antworten mit gpt-4o-mini.</p></div>
+    <div class="feat"><h3>Nur Friendly</h3><p>Adult-Modus entfernt.</p></div>
+    <div class="feat"><h3>Verby Forum</h3><p>Updates & Changelogs per Discobot.</p></div>
+    <div class="feat"><h3>Photo Editor</h3><p>Bilder bearbeiten und speichern.</p></div>
   </div>
 </div>
 <div id="auth" class="screen">
