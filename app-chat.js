@@ -25,7 +25,7 @@ function paintMsgs(hist) {
   msgs.scrollTop = 99999;
 }
 function fmt(t) { return esc(t).replace(/\*([^*]+)\*/g, '<span class="act">*$1*</span>').replace(/\n/g, '<br>'); }
-function updateTokenBar() { var el = document.getElementById('tokenBar'); if (!el) return; el.textContent = (VERBY_AI.hasAnyKey() ? ((VERBY_AI.isClaude() ? 'Claude' : 'ChatGPT') + ' · ' + VERBY_AI.model) : 'Lokaler Fallback') + ' · Credits: ' + (isDev() ? '∞' : store.credits()); }
+function updateTokenBar() { var el = document.getElementById('tokenBar'); if (!el) return; el.textContent = (VERBY_AI.hasAnyKey() ? ((VERBY_AI.isClaude() ? 'Claude' : 'ChatGPT') + ' · ' + VERBY_AI.model) : 'Verby AI lokal') + ' · Credits: ' + (isDev() ? '∞' : store.credits()); }
 function showChatMenu() {
   if (!cur) return; var th = ensureThreads(cur.id);
   var list = th.map(function (t, i) { return (i + 1) + '. ' + (t.id === curThread ? '→ ' : '') + t.title; }).join('\n');
@@ -73,7 +73,7 @@ function buildSystemPrompt(char) {
   return system;
 }
 async function openaiCharacterReply(char, hist, signal) {
-  if (!VERBY_AI.hasAnyKey()) throw new Error('Kein API-Key — unter Settings OpenAI oder Claude Key eintragen');
+  if (!VERBY_AI.hasAnyKey()) throw new Error('Kein API-Key');
   var system = buildSystemPrompt(char);
   if (VERBY_AI.isClaude()) return claudeCharacterReply(char, hist, system, signal);
   var messages = [];
@@ -91,7 +91,7 @@ async function openaiCharacterReply(char, hist, signal) {
 }
 async function claudeCharacterReply(char, hist, system, signal) {
   var key = VERBY_AI.getClaudeKey();
-  if (!key) throw new Error('Kein Claude Key — unter Settings eintragen');
+  if (!key) throw new Error('Kein Claude Key');
   var messages = [];
   hist.slice(-16).forEach(function (m) { messages.push({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text }); });
   if (!messages.length || messages[0].role !== 'user') messages.unshift({ role: 'user', content: '(Chat startet)' });
@@ -129,38 +129,80 @@ document.querySelectorAll('.nb[data-v]').forEach(function (b) { b.onclick = func
 window.addEventListener('online', function () { document.getElementById('offlineBar').classList.remove('on'); });
 window.addEventListener('offline', function () { document.getElementById('offlineBar').classList.add('on'); });
 if (!navigator.onLine) document.getElementById('offlineBar').classList.add('on');
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js?v=' + (window.VERBY_VERSION || '5.2')).then(function (reg) {
+    try { reg.update(); } catch (e) {}
+    setInterval(function () { try { reg.update(); } catch (e) {} }, 60000);
+  }).catch(function () {});
+}
 function runUpdateScreen(then) {
   const prev = localStorage.getItem('vb_app_version'); const ver = window.VERBY_VERSION || '0'; if (prev === ver) { then(); return; }
   const ov = document.getElementById('updateOverlay'); const bar = document.getElementById('updateBar'); const sub = document.getElementById('updateSub');
   if (!ov) { then(); return; } ov.classList.add('on');
   if (sub) { var log = (window.VERBY_CHANGELOG || [])[0]; sub.textContent = 'v' + ver + (log ? ' · ' + log.t.slice(0, 40) + '…' : ''); }
-  const maxMs = 6500, start = Date.now();
+  const maxMs = 5000, start = Date.now();
   const timer = setInterval(function () {
-    const elapsed = Date.now() - start; let p = Math.min(100, (elapsed / maxMs) * 100); if (elapsed > 1000) p = Math.min(100, p + 12);
+    const elapsed = Date.now() - start; let p = Math.min(100, (elapsed / maxMs) * 100); if (elapsed > 800) p = Math.min(100, p + 15);
     if (bar) bar.style.width = p + '%';
-    if (p >= 100 || elapsed >= maxMs) { clearInterval(timer); if (bar) bar.style.width = '100%'; localStorage.setItem('vb_app_version', ver); try { ensureForumSeed(); } catch (e) {} setTimeout(function () { ov.classList.remove('on'); then(); }, 180); }
-  }, 80);
+    if (p >= 100 || elapsed >= maxMs) { clearInterval(timer); if (bar) bar.style.width = '100%'; localStorage.setItem('vb_app_version', ver); try { ensureForumSeed(); } catch (e) {} setTimeout(function () { ov.classList.remove('on'); then(); }, 150); }
+  }, 70);
+}
+async function resolveAuthSession() {
+  if (!sb) return !!store.user();
+  try {
+    var href = window.location.href;
+    if (href.indexOf('code=') >= 0 || href.indexOf('access_token') >= 0 || href.indexOf('error=') >= 0) {
+      try { await sb.auth.exchangeCodeForSession(href); } catch (e1) { try { await sb.auth.getSession(); } catch (e2) {} }
+      try { window.history.replaceState({}, document.title, window.location.pathname || '/'); } catch (e3) {}
+    }
+    var tries = 0;
+    while (tries < 8) {
+      var res = await sb.auth.getSession();
+      if (res && res.data && res.data.session) { applySession(res.data.session); return true; }
+      tries++;
+      await new Promise(function (r) { setTimeout(r, 200); });
+    }
+  } catch (e) { console.warn('auth resolve', e); }
+  return !!store.user();
+}
+function wireAuthListener() {
+  if (!sb || window._vbAuthWired) return;
+  window._vbAuthWired = true;
+  sb.auth.onAuthStateChange(function (event, session) {
+    if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED')) {
+      applySession(session);
+      if (event === 'SIGNED_IN') enterApp();
+    }
+    if (event === 'SIGNED_OUT') { localStorage.removeItem('vb_user'); showLanding(); }
+  });
+}
+function startAutoUpdateCheck() {
+  var ver = window.VERBY_VERSION || '0';
+  setInterval(function () {
+    fetch('/index.html?vcheck=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { return r.text(); })
+      .then(function (html) {
+        var m = html.match(/VERBY_VERSION\s*=\s*['"]([^'"]+)['"]/);
+        if (m && m[1] && m[1] !== ver) {
+          localStorage.setItem('vb_app_version', '');
+          if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+          }
+          location.reload();
+        }
+      }).catch(function () {});
+  }, 45000);
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('controllerchange', function () { location.reload(); });
+  }
 }
 (async function boot() {
   runUpdateScreen(async function () {
-    try {
-      if (sb) {
-        const res = await sb.auth.getSession();
-        if (res.data && res.data.session) {
-          applySession(res.data.session); enterApp();
-          sb.auth.onAuthStateChange(function (event, session) {
-            if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION')) { applySession(session); if (event === 'SIGNED_IN') enterApp(); }
-            if (event === 'SIGNED_OUT') localStorage.removeItem('vb_user');
-          });
-          return;
-        }
-        sb.auth.onAuthStateChange(function (event, session) {
-          if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) { applySession(session); enterApp(); }
-          if (event === 'SIGNED_OUT') localStorage.removeItem('vb_user');
-        });
-      }
-    } catch (e) { console.warn(e); }
-    if (store.user()) enterApp(); else showLanding();
+    wireAuthListener();
+    var ok = false;
+    try { ok = await resolveAuthSession(); } catch (e) { console.warn(e); }
+    if (ok || store.user()) enterApp();
+    else showLanding();
+    startAutoUpdateCheck();
   });
 })();
