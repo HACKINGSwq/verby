@@ -8,8 +8,8 @@
       document.head.appendChild(s);
     });
   }
-  load('app-core.js').then(function(){ return load('app-chat.js'); }).catch(function(e){
-    console.error(e);
-    alert('App konnte nicht geladen werden.');
-  });
+  load('app-core.js')
+    .then(function(){ return load('app-ui.js'); })
+    .then(function(){ return load('app-chat.js'); })
+    .catch(function(e){ console.error(e); alert('App konnte nicht geladen werden.'); });
 })();
