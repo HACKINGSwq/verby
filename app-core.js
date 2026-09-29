@@ -99,8 +99,16 @@ function hideAll() {
     const e = document.getElementById(id); if (!e) return; e.classList.remove('on'); e.style.display = 'none';
   });
 }
-function showLanding() { if (store.user()) { enterApp(); return; } hideAll(); const e = document.getElementById('landing'); e.classList.add('on'); e.style.display = 'block'; }
-function goAuth() { if (store.user()) { enterApp(); return; } hideAll(); const e = document.getElementById('auth'); e.classList.add('on'); e.style.display = 'grid'; }
+function showLanding() {
+  if (store.user()) { enterApp(); return; }
+  if (window.location.href.indexOf('code=') >= 0 || window.location.href.indexOf('access_token') >= 0) return;
+  hideAll(); const e = document.getElementById('landing'); e.classList.add('on'); e.style.display = 'block';
+}
+function goAuth() {
+  if (store.user()) { enterApp(); return; }
+  if (window.location.href.indexOf('code=') >= 0) return;
+  hideAll(); const e = document.getElementById('auth'); e.classList.add('on'); e.style.display = 'grid';
+}
 function enterApp() { hideAll(); ensureForumSeed(); const e = document.getElementById('app'); e.classList.add('on'); e.style.display = 'flex'; render('home'); }
 function showPage(which) {
   hideAll(); const el = document.getElementById('page'); el.classList.add('on'); el.style.display = 'block';
@@ -110,11 +118,11 @@ function showPage(which) {
       return '<div class="card"><h3>v' + esc(x.v) + '</h3><p class="muted">' + esc(x.t) + '</p>' + (x.detail ? '<p style="margin-top:8px;font-size:14px;line-height:1.5">' + esc(x.detail) + '</p>' : '') + '</div>';
     }).join('');
   } else if (which === 'about') {
-    el.innerHTML = back + '<h1 style="margin:16px 0">Ueber Verby</h1><div class="card"><p>Friendly Character-Chat mit ChatGPT und Claude.</p></div>';
+    el.innerHTML = back + '<h1 style="margin:16px 0">Ueber Verby</h1><div class="card"><p>Friendly Character-Chat mit Verby AI (ChatGPT + Claude).</p></div>';
   } else if (which === 'safety') {
     el.innerHTML = back + '<h1 style="margin:16px 0">Safety Center</h1><div class="card"><p>Friendly-Modus. Respektvoll chatten.</p></div>';
   } else if (which === 'help') {
-    el.innerHTML = back + '<h1 style="margin:16px 0">Hilfe</h1><div class="card"><p><b>Login:</b> Nur Google tippen — Session bleibt.</p><p style="margin-top:8px"><b>AI:</b> Settings → OpenAI und/oder Claude Key → Modell waehlen.</p></div>';
+    el.innerHTML = back + '<h1 style="margin:16px 0">Hilfe</h1><div class="card"><p><b>Login:</b> Nur Google — einmal reicht, Session bleibt.</p><p style="margin-top:8px"><b>Updates:</b> laden automatisch, kein Ctrl+Shift+R noetig.</p><p style="margin-top:8px"><b>AI:</b> Settings → Keys speichern.</p></div>';
   }
 }
 function frameClass(u) { if (!u) return ''; const f = store.flags().frames || {}; const fr = u.frame || f[(u.email || '').toLowerCase()]; return fr ? 'frame-' + fr : ''; }
@@ -199,7 +207,7 @@ function renderReal(view) {
   }
   if (view === 'settings') {
     var hasKey = VERBY_AI.isClaude() ? !!VERBY_AI.getClaudeKey() : !!VERBY_AI.getOpenAIKey(); var th = store.theme();
-    root.innerHTML = '<div class="card glass"><div class="h2">Settings</div><p class="muted">' + esc(u.email || '') + '</p><p class="muted">v' + esc(window.VERBY_VERSION || '') + ' · Credits: ' + (isDev() ? '∞' : cred) + '</p><div class="form-g" style="margin-top:14px"><label>Theme</label><select id="themeSel"><option value="dark"' + (th === 'dark' ? ' selected' : '') + '>Dunkel</option><option value="light"' + (th === 'light' ? ' selected' : '') + '>Hell</option></select></div><button class="btn btn-g" type="button" onclick="saveTheme()">Theme speichern</button><div class="form-g" style="margin-top:14px"><label>ChatGPT / OpenAI Key</label><input id="oakey" type="password" placeholder="sk-proj-..." autocomplete="off"></div><div class="form-g"><label>Claude Key</label><input id="clkey" type="password" placeholder="sk-ant-..." autocomplete="off"></div><div class="form-g"><label>AI-Modell</label><select id="aimodel">' + AI_MODELS.map(function (m) { return '<option value="' + m.id + '"' + (VERBY_AI.model === m.id ? ' selected' : '') + '>' + m.label + '</option>'; }).join('') + '</select></div><button class="btn btn-p" type="button" onclick="saveOpenAIKey()">Keys & Modell speichern</button> <button class="btn btn-d" type="button" onclick="clearOpenAIKey()">Keys loeschen</button><p class="muted" style="margin-top:8px;font-size:12px">' + (hasKey ? 'Key aktiv' : 'Kein Key — Fallback') + ' · Keys nur lokal</p><button class="btn btn-g" style="width:100%;margin-top:12px" type="button" onclick="showPage(\'updates\')">Changelog</button><button class="btn btn-d" style="width:100%;margin-top:12px" type="button" onclick="logout()">Logout</button></div>';
+    root.innerHTML = '<div class="card glass"><div class="h2">Settings</div><p class="muted">' + esc(u.email || '') + '</p><p class="muted">v' + esc(window.VERBY_VERSION || '') + ' · Credits: ' + (isDev() ? '∞' : cred) + '</p><div class="form-g" style="margin-top:14px"><label>Theme</label><select id="themeSel"><option value="dark"' + (th === 'dark' ? ' selected' : '') + '>Dunkel</option><option value="light"' + (th === 'light' ? ' selected' : '') + '>Hell</option></select></div><button class="btn btn-g" type="button" onclick="saveTheme()">Theme speichern</button><div class="form-g" style="margin-top:14px"><label>ChatGPT / OpenAI Key</label><input id="oakey" type="password" placeholder="sk-proj-..." autocomplete="off"></div><div class="form-g"><label>Claude Key</label><input id="clkey" type="password" placeholder="sk-ant-..." autocomplete="off"></div><div class="form-g"><label>AI-Modell</label><select id="aimodel">' + AI_MODELS.map(function (m) { return '<option value="' + m.id + '"' + (VERBY_AI.model === m.id ? ' selected' : '') + '>' + m.label + '</option>'; }).join('') + '</select></div><button class="btn btn-p" type="button" onclick="saveOpenAIKey()">Keys & Modell speichern</button> <button class="btn btn-d" type="button" onclick="clearOpenAIKey()">Keys loeschen</button><p class="muted" style="margin-top:8px;font-size:12px">' + (hasKey ? 'Key aktiv' : 'Kein Key — Verby AI lokal') + '</p><button class="btn btn-g" style="width:100%;margin-top:12px" type="button" onclick="showPage(\'updates\')">Changelog</button><button class="btn btn-d" style="width:100%;margin-top:12px" type="button" onclick="logout()">Logout</button></div>';
   }
   if (view === 'profile' && window._prof) {
     const c = window._prof; var isFav = store.favs().indexOf(c.id) >= 0;
