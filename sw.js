@@ -1,4 +1,4 @@
-const CACHE = 'verby-v52';
+const CACHE = 'verby-v60';
 const CORE = ['/', '/index.html', '/manifest.json'];
 
 self.addEventListener('install', (e) => {
@@ -22,16 +22,10 @@ self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
   if (url.origin !== self.location.origin) return;
-
   const path = url.pathname;
   const isCode = /\.(js|css|html|json)$/.test(path) || path === '/' || path.endsWith('/');
   const isApi = path.startsWith('/api/');
-
-  if (isApi) {
-    e.respondWith(fetch(e.request));
-    return;
-  }
-
+  if (isApi) { e.respondWith(fetch(e.request)); return; }
   if (isCode) {
     e.respondWith(
       fetch(e.request, { cache: 'no-store' })
@@ -46,11 +40,9 @@ self.addEventListener('fetch', (e) => {
     );
     return;
   }
-
   e.respondWith(
     caches.match(e.request).then((r) =>
-      r ||
-      fetch(e.request).then((res) => {
+      r || fetch(e.request).then((res) => {
         const copy = res.clone();
         caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
         return res;
