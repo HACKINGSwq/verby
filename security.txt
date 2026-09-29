@@ -1,0 +1,7 @@
+Contact: mailto:ninofox015@gmail.com
+Expires: 2027-12-31T23:59:59.000Z
+Preferred-Languages: de, en
+Canonical: https://verby-ai.vercel.app/security.txt
+Policy: https://verby-ai.vercel.app/
+Acknowledgments: Thanks for responsible disclosure.
+Hiring: Not currently.
