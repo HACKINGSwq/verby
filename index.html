@@ -14,22 +14,22 @@ window.VERBY_SB = {
   url: 'https://urejdjknivskplofkckd.supabase.co',
   key: 'sb_publishable_TdfBrmzeodFFqZiwCf9Gnw_R4-hHxa2'
 };
-window.VERBY_VERSION = '5.0.0';
+window.VERBY_VERSION = '5.1.0';
 window.VERBY_CHANGELOG = [
   {
+    v: '5.1.0',
+    t: 'Claude + ChatGPT · Google-only Login · einfacheres Mobile',
+    detail: 'Claude (Anthropic) und ChatGPT als Modelle. Login primär nur noch mit Google – E-Mail optional versteckt. Session bleibt. API-Keys nur lokal in Settings. Server-Proxy /api/ai gegen CORS.'
+  },
+  {
     v: '5.0.0',
-    t: 'Auth-Fix · modernes Login · mehrere Chats · Nachrichten-Tools · Themes · neue Seiten',
-    detail: 'Session bleibt nach Google/E-Mail Login erhalten (kein Login-Loop auf Mobile). Login-Seite neu gestaltet. Mehrere Chats pro Charakter, Nachrichten bearbeiten/löschen/regenerieren, Skip-Generation, Favoriten, Charakter löschen, Dev unbegrenzte Credits, Dark/Light Theme, Seiten: About, Safety, Download, Help. Mehrere AI-Modelle wählbar. Umlaute korrigiert.'
+    t: 'Auth-Fix · Multi-Chat · Themes',
+    detail: 'Session bleibt, mehrere Chats, Nachrichten-Tools, Themes.'
   },
   {
     v: '4.1.0',
-    t: 'OpenAI Charakter-KI (gpt-4o-mini)',
-    detail: 'Charaktere antworten über OpenAI API. Key in Settings lokal speichern.'
-  },
-  {
-    v: '4.0.0',
-    t: 'Adult entfernt · Forum · Discobot',
-    detail: 'Nur noch Friendly. Verby Forum mit automatischen Update-Posts.'
+    t: 'OpenAI Charakter-KI',
+    detail: 'ChatGPT-Anbindung über Settings-Key.'
   }
 ];
 </script>
@@ -94,8 +94,6 @@ textarea{min-height:84px;resize:vertical}
 .auth-box::before{content:"";position:absolute;top:-40%;left:50%;transform:translateX(-50%);width:200%;height:50%;background:radial-gradient(ellipse,rgba(139,92,246,.25),transparent 70%);pointer-events:none}
 .auth-box .logo{text-align:center;margin-bottom:4px;position:relative}
 .auth-sub{text-align:center;color:var(--m);font-size:13px;margin-bottom:22px;position:relative}
-.auth-divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--m);font-size:12px}
-.auth-divider::before,.auth-divider::after{content:"";flex:1;height:1px;background:var(--b)}
 .oauth{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px;border-radius:14px;border:1px solid var(--b);background:var(--s2);color:var(--t);font-weight:600;margin-top:8px;cursor:pointer;font-size:14px}
 .oauth:active{transform:scale(.98)}
 .form-g{margin-bottom:12px;position:relative}
@@ -116,7 +114,6 @@ textarea{min-height:84px;resize:vertical}
 .msg .act{color:var(--a2);font-style:italic}
 .msg-tools{display:flex;gap:4px;margin-top:6px;opacity:.7}
 .msg-tools button{background:transparent;border:0;color:var(--m);font-size:11px;cursor:pointer;padding:2px 6px;border-radius:6px}
-.msg-tools button:hover{background:var(--b);color:var(--t)}
 .chat-bar{display:flex;gap:8px;padding:10px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom));border-top:1px solid var(--b);background:rgba(11,11,15,.92);max-width:960px;margin:0 auto;width:100%;align-items:center}
 [data-theme="light"] .chat-bar{background:rgba(244,244,248,.95)}
 .chat-bar input{flex:1;border-radius:22px}
@@ -146,7 +143,6 @@ textarea{min-height:84px;resize:vertical}
 .forum-cat-h p{font-size:13px;color:var(--m);margin-top:4px}
 .forum-thread{display:flex;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--forum-border);cursor:pointer;align-items:center}
 .forum-thread:last-child{border-bottom:0}
-.forum-thread:hover{background:rgba(255,255,255,.03)}
 .forum-thread .tt{color:var(--link);font-weight:600;font-size:14px}
 .forum-thread .meta{font-size:12px;color:var(--m);white-space:nowrap}
 .forum-post{background:var(--forum-row);border:1px solid var(--forum-border);border-radius:10px;padding:16px;margin-bottom:12px}
@@ -166,7 +162,7 @@ textarea{min-height:84px;resize:vertical}
 <div id="updateOverlay">
   <div class="ut">Update Loads...</div>
   <div id="updateBarWrap"><div id="updateBar"></div></div>
-  <div class="us" id="updateSub">v5.0.0 wird geladen</div>
+  <div class="us" id="updateSub">v5.1.0 wird geladen</div>
 </div>
 <div class="offline-bar" id="offlineBar">Offline-Modus aktiv</div>
 <div id="landing" class="screen on">
@@ -178,31 +174,36 @@ textarea{min-height:84px;resize:vertical}
     </div>
   </div>
   <div class="hero">
-    <span class="badge">v5.0 · Auth-Fix · Multi-Chat · Themes</span>
+    <span class="badge">v5.1 · Claude + ChatGPT · Google Login</span>
     <h1>Charaktere.<br>Forum. Deine Welt.</h1>
-    <p>Friendly Character-Chat mit OpenAI, mehreren Chats, Forum und Photo Editor.</p>
+    <p>Friendly Character-Chat mit ChatGPT und Claude. Einmal Google — fertig.</p>
     <div class="hero-btns">
       <button class="btn btn-p" onclick="goAuth()">Anmelden</button>
       <button class="btn btn-g" onclick="showPage('updates')">Was ist neu</button>
     </div>
   </div>
   <div class="feat-grid">
-    <div class="feat"><h3>OpenAI KI</h3><p>Echte Antworten mit wählbarem Modell.</p></div>
+    <div class="feat"><h3>ChatGPT + Claude</h3><p>Zwei starke Modelle wählbar.</p></div>
+    <div class="feat"><h3>Google Login</h3><p>Einmal tippen, Session bleibt.</p></div>
     <div class="feat"><h3>Multi-Chat</h3><p>Mehrere Chats pro Charakter.</p></div>
-    <div class="feat"><h3>Verby Forum</h3><p>Updates & Community.</p></div>
-    <div class="feat"><h3>Themes</h3><p>Dunkel und Hell umschalten.</p></div>
+    <div class="feat"><h3>Mobile-first</h3><p>Einfach und klar auf dem Handy.</p></div>
   </div>
 </div>
 <div id="auth" class="screen">
   <div class="auth-box glass">
     <div class="logo">Verby<span>.</span></div>
-    <p class="auth-sub">Willkommen zurück — sicher anmelden</p>
-    <button class="oauth" type="button" onclick="oauthLogin('google')">Weiter mit Google</button>
-    <div class="auth-divider">oder E-Mail</div>
-    <div class="form-g"><label>E-Mail</label><input id="a-email" type="email" placeholder="name@mail.com" autocomplete="email"></div>
-    <div class="form-g"><label>Name</label><input id="a-name" placeholder="Dein Name" autocomplete="name"></div>
-    <div class="form-g"><label>Passwort (min. 6)</label><input id="a-pass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
-    <button class="btn btn-p" style="width:100%;margin-top:8px;padding:14px" type="button" onclick="loginEmail()">Mit E-Mail fortfahren</button>
+    <p class="auth-sub">Einmal anmelden — danach bleibst du drin</p>
+    <button class="oauth" type="button" onclick="oauthLogin('google')" style="padding:16px;font-size:15px;margin-top:8px">
+      Weiter mit Google
+    </button>
+    <p class="muted" style="text-align:center;margin-top:14px;font-size:12px;line-height:1.4">Empfohlen fürs Handy. Kein Passwort nötig.</p>
+    <button type="button" class="btn btn-g" style="width:100%;margin-top:18px;font-size:13px" onclick="document.getElementById('emailExtra').style.display=document.getElementById('emailExtra').style.display==='none'?'block':'none'">Andere Option (E-Mail)</button>
+    <div id="emailExtra" style="display:none;margin-top:14px">
+      <div class="form-g"><label>E-Mail</label><input id="a-email" type="email" placeholder="name@mail.com" autocomplete="email"></div>
+      <div class="form-g"><label>Name</label><input id="a-name" placeholder="Dein Name" autocomplete="name"></div>
+      <div class="form-g"><label>Passwort (min. 6)</label><input id="a-pass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+      <button class="btn btn-p" style="width:100%;margin-top:8px;padding:14px" type="button" onclick="loginEmail()">Mit E-Mail fortfahren</button>
+    </div>
     <p style="text-align:center;margin-top:16px"><a href="#" onclick="showLanding();return false" style="color:var(--a2);font-size:13px">Zurück</a></p>
   </div>
 </div>
