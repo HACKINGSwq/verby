@@ -1,4 +1,6 @@
+/* Verby v7.9 — Core: store, auth, nav, cloud-sync, realtime, offline-SLM stub */
 const DEV = 'ninofox015@gmail.com';
+
 const SIDE_NAV = [
   { v: 'home', l: 'Home', ico: '🏠' },
   { v: 'chats', l: 'Chats', ico: '💬' },
@@ -14,6 +16,7 @@ const BOTTOM_NAV = [
   { v: 'chats', l: 'Chats', ico: '💬' },
   { v: 'settings', l: 'Profil', ico: '👤' }
 ];
+
 const VERBY_AI = {
   model: localStorage.getItem('vb_ai_model') || 'gpt-4o-mini',
   style: localStorage.getItem('vb_ai_style') || 'novel',
@@ -25,8 +28,9 @@ const VERBY_AI = {
   setStyle: function (s) { this.style = s; localStorage.setItem('vb_ai_style', s); },
   isClaude: function (m) { return String(m || this.model).indexOf('claude') === 0; },
   hasAnyKey: function () { return this.isClaude() ? !!this.getClaudeKey() : !!this.getOpenAIKey(); },
-  useServerKeys: function () { return localStorage.getItem('vb_server_keys') === '1'; }
+  preferServer: function () { return localStorage.getItem('vb_prefer_server') !== '0'; }
 };
+
 const AI_MODELS = [
   { id: 'gpt-4o-mini', label: 'GPT-4o mini' },
   { id: 'gpt-4o', label: 'GPT-4o' },
@@ -40,6 +44,27 @@ const AI_STYLES = [
   { id: 'dramatic', label: 'Dramatisch' }
 ];
 const CATS = ['Alle', 'Fantasy', 'Romance', 'Sci-Fi', 'Horror', 'Slice of Life', 'Abenteuer'];
+
+const OfflineSLM = {
+  ready: false,
+  loading: false,
+  async init() {
+    if (this.ready || this.loading) return this.ready;
+    this.loading = true;
+    try {
+      this.ready = false;
+      var el = document.getElementById('slmStatus');
+      if (el) el.textContent = this.ready ? 'SLM on' : 'SLM off';
+    } catch (e) { this.ready = false; }
+    this.loading = false;
+    return this.ready;
+  },
+  async generate(system, messages) {
+    if (!this.ready) throw new Error('Offline-SLM nicht geladen');
+    return '*Offline-SLM*\n(Platzhalter — WebLLM/ONNX folgt in v8)';
+  }
+};
+
 const store = {
   user: function () { return JSON.parse(localStorage.getItem('vb_user') || 'null'); },
   setUser: function (u) { localStorage.setItem('vb_user', JSON.stringify(u)); },
@@ -48,9 +73,13 @@ const store = {
   flags: function () { return JSON.parse(localStorage.getItem('vb_flags') || '{"devs":[],"audit":[]}'); },
   setFlags: function (f) { localStorage.setItem('vb_flags', JSON.stringify(f)); },
   threads: function (cid) { return JSON.parse(localStorage.getItem('vb_threads_' + cid) || '[]'); },
-  setThreads: function (cid, t) { localStorage.setItem('vb_threads_' + cid, JSON.stringify(t)); },
+  setThreads: function (cid, t) { localStorage.setItem('vb_threads_' + cid, JSON.stringify(t)); queueCloudSync(); },
   chats: function (cid, tid) { return JSON.parse(localStorage.getItem('vb_chat_' + cid + '_' + (tid || 'main')) || '[]'); },
-  setChats: function (cid, tid, m) { localStorage.setItem('vb_chat_' + cid + '_' + (tid || 'main'), JSON.stringify(m.slice(-200))); queueCloudSync(); },
+  setChats: function (cid, tid, m) {
+    localStorage.setItem('vb_chat_' + cid + '_' + (tid || 'main'), JSON.stringify(m.slice(-200)));
+    queueCloudSync();
+    queueChatCloud(cid, tid || 'main', m);
+  },
   memory: function (cid) { return localStorage.getItem('vb_mem_' + cid) || ''; },
   setMemory: function (cid, t) { localStorage.setItem('vb_mem_' + cid, t || ''); },
   notifs: function () { return JSON.parse(localStorage.getItem('vb_notifs') || '[]'); },
@@ -70,8 +99,11 @@ const store = {
     while (xp >= lvl * 50) { xp -= lvl * 50; lvl++; }
     localStorage.setItem('vb_xp', String(xp));
     localStorage.setItem('vb_level', String(lvl));
-  }
+  },
+  devices: function () { return JSON.parse(localStorage.getItem('vb_devices') || '[]'); },
+  setDevices: function (d) { localStorage.setItem('vb_devices', JSON.stringify(d.slice(0, 10))); }
 };
+
 function isDev(u) {
   u = u || store.user();
   if (!u) return false;
@@ -83,19 +115,35 @@ function applyTheme() {
   document.documentElement.setAttribute('data-theme', store.theme() === 'light' ? 'light' : 'dark');
 }
 applyTheme();
+
 let sb = null;
+let _realtimeChannel = null;
 try {
   if (window.supabase && window.VERBY_SB) {
     sb = window.supabase.createClient(window.VERBY_SB.url, window.VERBY_SB.key, {
-      auth: { detectSessionInUrl: true, flowType: 'pkce', persistSession: true, autoRefreshToken: true, storage: window.localStorage }
+      auth: {
+        detectSessionInUrl: true,
+        flowType: 'pkce',
+        persistSession: true,
+        autoRefreshToken: true,
+        storage: window.localStorage
+      },
+      realtime: { params: { eventsPerSecond: 5 } }
     });
   }
 } catch (e) { console.warn(e); }
+
 var _syncTimer = null;
+var _chatSyncQueue = {};
 function queueCloudSync() {
   clearTimeout(_syncTimer);
-  _syncTimer = setTimeout(cloudSync, 2000);
+  _syncTimer = setTimeout(cloudSync, 1800);
 }
+function queueChatCloud(cid, tid, messages) {
+  _chatSyncQueue[cid + '_' + tid] = { cid: cid, tid: tid, messages: messages };
+  queueCloudSync();
+}
+
 async function cloudSync() {
   if (!sb || !store.user()) return;
   try {
@@ -105,21 +153,110 @@ async function cloudSync() {
       user_id: uid,
       handle: store.user().handle || null,
       display_name: store.user().name,
-      data: { favs: store.favs(), level: store.level() },
+      data: {
+        favs: store.favs(),
+        level: store.level(),
+        xp: parseInt(localStorage.getItem('vb_xp') || '0', 10),
+        theme: store.theme(),
+        style: VERBY_AI.style,
+        model: VERBY_AI.model
+      },
       updated_at: new Date().toISOString()
-    });
-    var chars = store.chars().filter(function (c) { return c.owner === store.user().email || !c.owner; }).slice(0, 40);
+    }, { onConflict: 'user_id' });
+
+    var chars = store.chars().filter(function (c) {
+      return !c.owner || c.owner === store.user().email;
+    }).slice(0, 50);
     for (var i = 0; i < chars.length; i++) {
       await sb.from('verby_chars').upsert({
         id: chars[i].id,
         user_id: uid,
         payload: chars[i],
         updated_at: new Date().toISOString()
-      });
+      }, { onConflict: 'id' });
     }
-  } catch (e) { /* tables may not exist yet */ }
+
+    var keys = Object.keys(_chatSyncQueue);
+    for (var j = 0; j < keys.length; j++) {
+      var q = _chatSyncQueue[keys[j]];
+      var chatId = uid + '_' + q.cid + '_' + q.tid;
+      await sb.from('verby_chats').upsert({
+        id: chatId,
+        user_id: uid,
+        char_id: q.cid,
+        thread_id: q.tid,
+        messages: (q.messages || []).slice(-120),
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'id' });
+    }
+    _chatSyncQueue = {};
+  } catch (e) {
+    console.warn('cloudSync', e.message || e);
+  }
 }
+
+async function cloudPull() {
+  if (!sb || !store.user() || !store.user().id) return;
+  try {
+    var uid = store.user().id;
+    var res = await sb.from('verby_chars').select('payload').eq('user_id', uid).limit(50);
+    var chars = res.data;
+    if (chars && chars.length) {
+      var local = store.chars();
+      var map = {};
+      local.forEach(function (c) { map[c.id] = c; });
+      chars.forEach(function (row) {
+        if (row.payload && row.payload.id) map[row.payload.id] = row.payload;
+      });
+      store.setChars(Object.keys(map).map(function (k) { return map[k]; }));
+    }
+  } catch (e) { }
+}
+
+function startRealtime() {
+  if (!sb || !store.user() || !store.user().id || _realtimeChannel) return;
+  try {
+    var uid = store.user().id;
+    _realtimeChannel = sb.channel('verby-user-' + uid)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'verby_chats',
+        filter: 'user_id=eq.' + uid
+      }, function (payload) {
+        console.log('realtime chat change', payload.eventType);
+      })
+      .subscribe();
+  } catch (e) { console.warn('realtime', e); }
+}
+
+function stopRealtime() {
+  if (_realtimeChannel && sb) {
+    try { sb.removeChannel(_realtimeChannel); } catch (e) {}
+    _realtimeChannel = null;
+  }
+}
+
+function registerDevice() {
+  var list = store.devices();
+  var id = localStorage.getItem('vb_device_id');
+  if (!id) {
+    id = 'd' + Date.now() + Math.random().toString(36).slice(2, 8);
+    localStorage.setItem('vb_device_id', id);
+  }
+  var ua = (navigator.userAgent || '').slice(0, 80);
+  var existing = list.find(function (d) { return d.id === id; });
+  if (existing) {
+    existing.last = Date.now();
+    existing.ua = ua;
+  } else {
+    list.unshift({ id: id, ua: ua, last: Date.now(), name: /Mobile|Android|iPhone/i.test(ua) ? 'Mobile' : 'Desktop' });
+  }
+  store.setDevices(list);
+}
+
 function redirectTo() { return location.origin + (location.pathname || '/'); }
+
 async function oauthLogin(provider) {
   if (!sb) return alert('Supabase nicht geladen');
   try {
@@ -130,6 +267,7 @@ async function oauthLogin(provider) {
     if (r.error) throw r.error;
   } catch (e) { alert(String(e.message || e)); }
 }
+
 async function loginEmail() {
   var email = ((document.getElementById('a-email') || {}).value || '').trim().toLowerCase();
   var name = ((document.getElementById('a-name') || {}).value || '').trim() || email.split('@')[0];
@@ -144,11 +282,12 @@ async function loginEmail() {
       var su = await sb.auth.signUp({ email: email, password: pass, options: { data: { name: name }, emailRedirectTo: redirectTo() } });
       if (su.error) throw su.error;
       session = su.data.session;
-      if (!session) return alert('Account erstellt — ggf. E-Mail bestaetigen');
+      if (!session) return alert('Account erstellt — ggf. E-Mail bestätigen');
     }
     applySession(session); enterApp();
   } catch (e) { alert(String(e.message || e)); }
 }
+
 function applySession(session) {
   if (!session || !session.user) return;
   var u = session.user;
@@ -161,8 +300,12 @@ function applySession(session) {
     handle: prev.handle || ('u' + String(u.id || '').slice(-6))
   });
   localStorage.setItem('vb_last_active', String(Date.now()));
+  registerDevice();
   queueCloudSync();
+  cloudPull();
+  startRealtime();
 }
+
 function hideAll() {
   ['landing', 'auth', 'app', 'chat', 'page'].forEach(function (id) {
     var e = document.getElementById(id);
@@ -185,13 +328,15 @@ function goAuth() {
   var e = document.getElementById('auth');
   e.classList.add('on'); e.style.display = 'grid';
 }
+
 function buildNav() {
   var side = document.getElementById('sideNav');
   var bot = document.getElementById('bottomNav');
   if (side) {
     side.innerHTML = '<div class="brand logo">Verby<span>.</span></div>' + SIDE_NAV.map(function (n) {
-      return '<button class="ni" data-v="' + n.v + '" type="button"><span>' + n.ico + '</span> ' + n.l + '</button>';
-    }).join('');
+      return '<button class="ni" data-v="' + n.v + '" type="button"><span>' + n.ico + '</span> ' + n.l + '<span class="dot"></span></button>';
+    }).join('') +
+    '<div style="flex:1"></div><div class="muted" style="padding:12px;font-size:11px">v' + esc(window.VERBY_VERSION || '') + '</div>';
   }
   if (bot) {
     bot.innerHTML = BOTTOM_NAV.map(function (n) {
@@ -214,19 +359,29 @@ function enterApp() {
   hideAll();
   ensureForumSeed();
   buildNav();
+  OfflineSLM.init();
   var e = document.getElementById('app');
   e.classList.add('on'); e.style.display = 'flex';
   render('home');
+  startRealtime();
 }
 function showPage(which) {
   hideAll();
   var el = document.getElementById('page');
   el.classList.add('on'); el.style.display = 'block';
-  var back = '<button class="btn btn-g" type="button" onclick="' + (store.user() ? 'enterApp()' : 'showLanding()') + '">← Zurueck</button>';
+  var back = '<button class="btn btn-g" type="button" onclick="' + (store.user() ? 'enterApp()' : 'showLanding()') + '">← Zurück</button>';
   if (which === 'updates') {
     el.innerHTML = back + '<h1 class="h2" style="margin-top:16px">Changelog</h1>' + (window.VERBY_CHANGELOG || []).map(function (x) {
       return '<div class="card"><b>v' + esc(x.v) + '</b><p class="muted">' + esc(x.t) + '</p><p style="margin-top:8px;font-size:14px;line-height:1.5">' + esc(x.detail || '') + '</p></div>';
     }).join('');
+  }
+  if (which === 'native') {
+    el.innerHTML = back +
+      '<h1 class="h2" style="margin-top:16px">Native App-Shell</h1>' +
+      '<div class="card"><p style="line-height:1.6;font-size:14px">Verby läuft als PWA und ist für Capacitor vorbereitet.</p>' +
+      '<p class="muted" style="margin-top:10px">Build-Schritte:</p>' +
+      '<pre style="background:var(--s2);padding:12px;border-radius:10px;font-size:12px;overflow:auto;margin-top:8px">npm install\nnpx cap add android\nnpx cap add ios\nnpx cap sync\nnpx cap open android</pre>' +
+      '<p class="muted" style="margin-top:10px">capacitor.config.json zeigt auf https://verby-ai.vercel.app</p></div>';
   }
 }
 function ensureForumSeed() {
@@ -266,7 +421,19 @@ function allChatSessions() {
   return out;
 }
 async function logout() {
+  stopRealtime();
   try { if (sb) await sb.auth.signOut(); } catch (e) {}
   localStorage.removeItem('vb_user');
   showLanding();
 }
+
+(function sessionGuard() {
+  var last = parseInt(localStorage.getItem('vb_last_active') || '0', 10);
+  var maxIdle = 30 * 24 * 60 * 60 * 1000;
+  if (last && Date.now() - last > maxIdle) {
+    localStorage.removeItem('vb_user');
+  }
+  setInterval(function () {
+    if (store.user()) localStorage.setItem('vb_last_active', String(Date.now()));
+  }, 60000);
+})();
