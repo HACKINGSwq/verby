@@ -5,20 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
 <meta name="theme-color" content="#07070b">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="Verby — Character.AI-style chats. One design. Streaming AI. Cloud sync.">
 <link rel="manifest" href="manifest.json">
 <title>Verby</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-window.VERBY_SB={url:'https://urejdjknivskplofkckd.supabase.co',key:'sb_publishable_TdfBrmzeodFFqZiwCf9Gnw_R4-hHxa2'};
-window.VERBY_VERSION='7.9.0';
-window.VERBY_CHANGELOG=[
-{v:'7.9.0',t:'One Design · c.ai-AI · Chat-Liste · Streaming · Cloud-Sync · App-Shell',detail:'Sidebar Desktop, Bottom-Nav Mobile. Character.AI-Pipeline, Memory, Streaming. Chat-Liste, Profil, Create-Studio. Server-Keys, Supabase-Schema, Capacitor, TypeScript-Prep.'},
-{v:'6.0.0',t:'Mega-Update',detail:'Teilen, Badges, Seasons.'}
+window.VERBY_SB = {
+  url: 'https://urejdjknivskplofkckd.supabase.co',
+  key: 'sb_publishable_TdfBrmzeodFFqZiwCf9Gnw_R4-hHxa2'
+};
+window.VERBY_VERSION = '7.9.0';
+window.VERBY_CHANGELOG = [
+  {
+    v: '7.9.0',
+    t: 'One Design · c.ai-AI · Native Shell · Cloud-Sync · Offline-SLM',
+    detail: 'Einheitliches Design-System: Desktop = Sidebar links (Home, Chats, Discover, Create, Forum, Settings) — keine Nav-Pills mehr. Mobile = Bottom-Nav. Chat-Screen full. Character.AI-Pipeline: romanhafter Default, längere Antworten, Streaming, Memory/Lore auto-update, Prompt-Kern. Chat-Liste (alle aktiven, zuletzt genutzt). Großes Charakter-Profil. Create-Studio mit Live-Preview. Echte Cloud-Sync (verby_profiles/chars/chats + Realtime-Stub). Keys nur auf Server (OPENAI_API_KEY/ANTHROPIC_API_KEY). Capacitor Native App-Shell (iOS/Android/Desktop). Offline-SLM Platzhalter. TypeScript-Migration (tsconfig). HTTP-only Session via Supabase PKCE. PWA offline lesen.'
+  },
+  { v: '6.0.0', t: 'Mega-Update Features', detail: 'Teilen, Badges, Seasons, Security.' },
+  { v: '5.2.0', t: 'Login-Fix · Auto-Update', detail: 'OAuth stabil.' }
 ];
 </script>
 <style>
-:root{--bg:#07070b;--s:#12121a;--s2:#181822;--s3:#22222e;--b:rgba(255,255,255,.07);--t:#f4f4f7;--m:#8e8e9a;--a:#8b5cf6;--a2:#a78bfa;--danger:#ef4444;--user:#5b4a9e;--r:16px;--side:240px}
-[data-theme=light]{--bg:#f3f3f7;--s:#fff;--s2:#f7f7fb;--s3:#ececf2;--b:rgba(0,0,0,.08);--t:#14141c;--m:#6a6a78;--a:#7c3aed;--a2:#6d28d9;--user:#7c6bb0}
+:root {
+  --bg:#07070b; --s:#12121a; --s2:#181822; --s3:#22222e;
+  --b:rgba(255,255,255,.07); --t:#f4f4f7; --m:#8e8e9a;
+  --a:#8b5cf6; --a2:#a78bfa; --danger:#ef4444; --user:#5b4a9e;
+  --glow:rgba(139,92,246,.28); --r:16px; --nav:64px; --side:248px;
+  --glass:rgba(18,18,26,.72);
+}
+[data-theme="light"] {
+  --bg:#f3f3f7; --s:#fff; --s2:#f7f7fb; --s3:#ececf2;
+  --b:rgba(0,0,0,.08); --t:#14141c; --m:#6a6a78; --a:#7c3aed; --a2:#6d28d9;
+  --glow:rgba(124,58,237,.15); --user:#7c6bb0; --glass:rgba(255,255,255,.78);
+}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg);color:var(--t);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
 body{min-height:100dvh;overflow:hidden}
@@ -27,42 +47,52 @@ body{min-height:100dvh;overflow:hidden}
 #updateBarWrap{width:min(260px,70vw);height:5px;background:#222;border-radius:99px;overflow:hidden}
 #updateBar{height:100%;width:0;background:linear-gradient(90deg,var(--a),var(--a2));transition:width .15s}
 .logo{font-weight:800;font-size:20px}.logo span{color:var(--a)}
-.btn{border:0;border-radius:12px;padding:11px 16px;font-weight:650;font-size:14px;cursor:pointer}
-.btn-p{background:linear-gradient(135deg,var(--a),#6d28d9);color:#fff}.btn-g{background:var(--s2);color:var(--t);border:1px solid var(--b)}.btn-d{background:transparent;color:var(--danger);border:1px solid rgba(239,68,68,.35)}.btn-sm{padding:7px 11px;font-size:12px;border-radius:10px}
-input,textarea,select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--b);background:var(--s2);color:var(--t);font-size:15px;outline:none}
-input:focus,textarea:focus{border-color:var(--a)}textarea{min-height:88px;resize:vertical}
+.btn{border:0;border-radius:12px;padding:11px 16px;font-weight:650;font-size:14px;cursor:pointer;transition:transform .1s,opacity .12s}
+.btn:active{transform:scale(.97)}
+.btn-p{background:linear-gradient(135deg,var(--a),#6d28d9);color:#fff;box-shadow:0 4px 20px var(--glow)}
+.btn-g{background:var(--s2);color:var(--t);border:1px solid var(--b)}
+.btn-d{background:transparent;color:var(--danger);border:1px solid rgba(239,68,68,.35)}
+.btn-sm{padding:7px 11px;font-size:12px;border-radius:10px}
+input,textarea,select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--b);background:var(--s2);color:var(--t);font-size:15px;outline:none;transition:border-color .15s}
+input:focus,textarea:focus{border-color:var(--a)}
+textarea{min-height:88px;resize:vertical}
 .avatar{width:48px;height:48px;border-radius:50%;background:var(--s3);display:grid;place-items:center;overflow:hidden;flex-shrink:0;background-size:cover;background-position:center;border:2px solid var(--b)}
-.avatar.xl{width:140px;height:140px;font-size:52px}
+.avatar.lg{width:112px;height:112px;font-size:42px}
+.avatar.xl{width:140px;height:140px;font-size:52px;border-width:3px;box-shadow:0 0 0 4px var(--glow)}
 .card{background:var(--s);border:1px solid var(--b);border-radius:var(--r);padding:14px;margin-bottom:10px}
-.muted{color:var(--m);font-size:13px}.h2{font-size:22px;font-weight:750;margin-bottom:6px}
+.muted{color:var(--m);font-size:13px}.h2{font-size:22px;font-weight:750;margin-bottom:6px;letter-spacing:-.02em}
 .row{display:flex;gap:12px;align-items:center}.grow{flex:1;min-width:0}
 .empty{text-align:center;color:var(--m);padding:48px 16px}
 .skel{height:72px;border-radius:14px;margin-bottom:10px;background:linear-gradient(90deg,var(--s2),var(--s3),var(--s2));background-size:200% 100%;animation:sh 1.2s infinite}
 @keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
 @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{opacity:.55}50%{opacity:1}}
 #landing,#auth,#page{display:none;position:relative;z-index:1;overflow:auto;height:100dvh}
 #landing.on,#auth.on,#page.on{display:block}
 #landing{padding:28px 20px 80px;max-width:960px;margin:0 auto}
 .hero h1{font-size:clamp(36px,7vw,56px);letter-spacing:-.03em;line-height:1.05;margin:16px 0 10px}
-.hero p{color:var(--m);max-width:480px;font-size:16px}
+.hero p{color:var(--m);max-width:520px;font-size:16px;line-height:1.55}
 .badge{display:inline-block;font-size:11px;padding:4px 10px;border-radius:999px;background:rgba(139,92,246,.2);color:var(--a2);font-weight:600}
 #auth{display:none;place-items:center;padding:20px}#auth.on{display:grid}
-.auth-box{width:min(400px,100%);padding:32px 28px;border-radius:20px;background:var(--s);border:1px solid var(--b)}
+.auth-box{width:min(400px,100%);padding:32px 28px;border-radius:20px;background:var(--s);border:1px solid var(--b);box-shadow:0 20px 60px rgba(0,0,0,.35)}
 .oauth{width:100%;padding:15px;border-radius:12px;border:1px solid rgba(139,92,246,.35);background:var(--s2);color:var(--t);font-weight:650;font-size:15px;cursor:pointer;margin-top:8px}
 #app{display:none;height:100dvh}#app.on{display:flex;flex-direction:column}
 .shell{display:flex;flex:1;min-height:0}
 .side{display:none;width:var(--side);flex-shrink:0;background:var(--s);border-right:1px solid var(--b);padding:16px 10px;flex-direction:column;gap:2px;overflow:auto}
-.side .brand{padding:8px 12px 18px;font-size:18px}
-.side .ni{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;color:var(--m);cursor:pointer;border:0;background:transparent;width:100%;font-size:14px;font-weight:600;text-align:left}
+.side .brand{padding:8px 12px 20px;font-size:18px}
+.side .ni{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;color:var(--m);cursor:pointer;border:0;background:transparent;width:100%;font-size:14px;font-weight:600;text-align:left;transition:background .12s,color .12s}
 .side .ni.on,.side .ni:hover{background:rgba(139,92,246,.14);color:var(--a2)}
+.side .ni .dot{width:8px;height:8px;border-radius:50%;background:var(--a);margin-left:auto;display:none}
+.side .ni.has-dot .dot{display:block}
 .main{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0}
-.topbar{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--b);background:rgba(7,7,11,.85);backdrop-filter:blur(12px)}
-#view{flex:1;overflow:auto;padding:16px;max-width:920px;width:100%;margin:0 auto}
+.topbar{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--b);background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+#view{flex:1;overflow:auto;padding:16px;max-width:920px;width:100%;margin:0 auto;-webkit-overflow-scrolling:touch}
 .bottom-nav{display:flex;border-top:1px solid var(--b);background:rgba(7,7,11,.94);padding:6px 8px max(6px,env(safe-area-inset-bottom));justify-content:space-around}
 .bottom-nav button{flex:1;background:transparent;border:0;color:var(--m);padding:8px 4px;font-size:11px;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
-.bottom-nav button.on{color:var(--a2)}.bottom-nav .ico{font-size:18px}
+.bottom-nav button.on{color:var(--a2)}
+.bottom-nav .ico{font-size:18px}
 #chat{display:none;flex-direction:column;height:100dvh}#chat.on{display:flex}
-.chat-head{display:flex;align-items:center;gap:10px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));border-bottom:1px solid var(--b);background:rgba(7,7,11,.9)}
+.chat-head{display:flex;align-items:center;gap:10px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));border-bottom:1px solid var(--b);background:var(--glass);backdrop-filter:blur(12px)}
 #msgs{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px;max-width:800px;width:100%;margin:0 auto}
 .msg{max-width:min(88%,560px);padding:12px 14px;border-radius:18px;line-height:1.55;font-size:15px;white-space:pre-wrap;word-break:break-word;animation:fade .18s ease}
 .msg.me{align-self:flex-end;background:linear-gradient(135deg,var(--user),#2a2448);border-bottom-right-radius:6px}
@@ -71,56 +101,76 @@ input:focus,textarea:focus{border-color:var(--a)}textarea{min-height:88px;resize
 .msg-tools button{background:0;border:0;color:var(--m);font-size:11px;cursor:pointer;margin-right:6px;margin-top:6px}
 .chat-input{padding:8px 12px max(10px,env(safe-area-inset-bottom));border-top:1px solid var(--b);background:rgba(7,7,11,.95);max-width:800px;width:100%;margin:0 auto}
 .chat-input .row input{border-radius:22px}
-.chat-input .send{width:44px;height:44px;border-radius:50%;border:0;background:var(--a);color:#fff;cursor:pointer;flex-shrink:0}
-.chips{display:flex;gap:6px;overflow-x:auto;padding:0 0 6px}
+.chat-input .send{width:44px;height:44px;border-radius:50%;border:0;background:var(--a);color:#fff;cursor:pointer;flex-shrink:0;font-size:16px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:0 0 6px;-webkit-overflow-scrolling:touch}
 .chip{flex-shrink:0;padding:6px 11px;border-radius:999px;border:1px solid var(--b);background:var(--s2);color:var(--m);font-size:12px;cursor:pointer}
-.typing{align-self:flex-start;padding:12px 14px;background:var(--s2);border:1px solid var(--b);border-radius:14px;color:var(--m);font-size:13px}
+.typing{align-self:flex-start;padding:12px 14px;background:var(--s2);border:1px solid var(--b);border-radius:14px;color:var(--m);font-size:13px;animation:pulse 1.2s infinite}
 .char-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
-.char-tile{background:var(--s);border:1px solid var(--b);border-radius:var(--r);overflow:hidden;cursor:pointer}
+.char-tile{background:var(--s);border:1px solid var(--b);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:transform .12s,border-color .12s,box-shadow .12s}
+.char-tile:hover{transform:translateY(-3px);border-color:rgba(139,92,246,.4);box-shadow:0 8px 28px rgba(0,0,0,.25)}
 .char-tile .ph{height:150px;background:var(--s3);background-size:cover;background-position:center;display:grid;place-items:center;font-size:40px}
-.char-tile .meta{padding:10px}.char-tile .meta b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.profile-hero{text-align:center;padding:24px 16px 16px}.profile-hero .bio{color:var(--m);max-width:420px;margin:8px auto 16px;line-height:1.5}
+.char-tile .meta{padding:10px}
+.char-tile .meta b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.profile-hero{text-align:center;padding:28px 16px 18px}
+.profile-hero .bio{color:var(--m);max-width:440px;margin:10px auto 18px;line-height:1.55;font-size:15px}
 .studio{display:grid;gap:16px}
+.chat-session{cursor:pointer;transition:border-color .12s}
+.chat-session:hover{border-color:rgba(139,92,246,.35)}
+.offline-bar{display:none;background:#3b1d1d;color:#fecaca;text-align:center;padding:8px;font-size:13px}
+.offline-bar.on{display:block}
 .form-g{margin-bottom:12px}.form-g label{display:block;font-size:12px;color:var(--m);margin-bottom:6px;font-weight:500}
 .section{font-size:12px;color:var(--m);text-transform:uppercase;letter-spacing:.4px;margin:14px 0 10px;font-weight:650}
-.offline-bar{display:none;background:#3b1d1d;color:#fecaca;text-align:center;padding:8px;font-size:13px}.offline-bar.on{display:block}
-@media(min-width:900px){.side{display:flex}.bottom-nav{display:none}.studio{grid-template-columns:1.1fr .9fr}#view{padding:24px 28px}.char-tile .ph{height:180px}}
-@media(max-width:899px){.side{display:none}}
+.tag{display:inline-block;font-size:11px;padding:3px 8px;border-radius:6px;background:rgba(139,92,246,.15);color:var(--a2);margin:2px}
+.slm-badge{font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(34,197,94,.15);color:#4ade80}
+@media(min-width:900px){
+  .side{display:flex}
+  .bottom-nav{display:none}
+  .studio{grid-template-columns:1.1fr .9fr}
+  #view{padding:24px 28px}
+  .char-tile .ph{height:180px}
+  .topbar .logo{display:none}
+}
+@media(max-width:899px){
+  .side{display:none}
+}
 </style>
 </head>
 <body>
-<div id="updateOverlay"><div style="color:#fff;font-weight:650">Update Loads...</div><div id="updateBarWrap"><div id="updateBar"></div></div><div id="updateSub" style="color:#888;font-size:13px">v7.9.0</div></div>
-<div class="offline-bar" id="offlineBar">Offline — Chats lokal lesbar, KI braucht Netz</div>
+<div id="updateOverlay"><div style="color:#fff;font-weight:650">Update lädt…</div><div id="updateBarWrap"><div id="updateBar"></div></div><div id="updateSub" style="color:#888;font-size:13px">v7.9.0</div></div>
+<div class="offline-bar" id="offlineBar">Offline — Chats lokal lesbar · Offline-SLM Platzhalter · KI braucht Netz</div>
+
 <div id="landing">
   <div class="row" style="justify-content:space-between;margin-bottom:32px">
     <div class="logo">Verby<span>.</span></div>
     <div class="row"><button class="btn btn-g btn-sm" type="button" onclick="showPage('updates')">Changelog</button><button class="btn btn-p btn-sm" type="button" onclick="goAuth()">Login</button></div>
   </div>
   <div class="hero">
-    <span class="badge">v7.9 · One Design · Smart AI</span>
-    <h1>Chats wie Character.AI.<br>Ein Design.</h1>
-    <p>Streaming, Memory, Chat-Liste, Sidebar &amp; Bottom-Nav — einmal Google.</p>
+    <span class="badge">v7.9 · One Design · Smart AI · Native</span>
+    <h1>Chats wie Character.AI.<br>Ein Design. Überall.</h1>
+    <p>Sidebar · Bottom-Nav · Streaming · Memory · Cloud-Sync · Native App-Shell. Keys bleiben auf dem Server. Offline-SLM vorbereitet.</p>
     <div class="row" style="margin-top:20px;flex-wrap:wrap">
       <button class="btn btn-p" type="button" onclick="goAuth()">Anmelden</button>
       <button class="btn btn-g" type="button" onclick="showPage('updates')">Was ist neu</button>
     </div>
   </div>
 </div>
+
 <div id="auth">
   <div class="auth-box">
     <div class="logo" style="text-align:center;margin-bottom:6px">Verby<span>.</span></div>
-    <p class="muted" style="text-align:center;margin-bottom:18px">Einmal anmelden — Session bleibt</p>
+    <p class="muted" style="text-align:center;margin-bottom:18px">Session via Supabase PKCE · sicher</p>
     <button class="oauth" type="button" onclick="oauthLogin('google')">Weiter mit Google</button>
     <button class="btn btn-g" style="width:100%;margin-top:14px;font-size:13px" type="button" onclick="var e=document.getElementById('emailExtra');e.style.display=e.style.display==='none'?'block':'none'">E-Mail</button>
     <div id="emailExtra" style="display:none;margin-top:12px">
-      <div class="form-g"><label>E-Mail</label><input id="a-email" type="email"></div>
-      <div class="form-g"><label>Name</label><input id="a-name"></div>
-      <div class="form-g"><label>Passwort</label><input id="a-pass" type="password"></div>
+      <div class="form-g"><label>E-Mail</label><input id="a-email" type="email" autocomplete="email"></div>
+      <div class="form-g"><label>Name</label><input id="a-name" autocomplete="name"></div>
+      <div class="form-g"><label>Passwort</label><input id="a-pass" type="password" autocomplete="current-password"></div>
       <button class="btn btn-p" style="width:100%" type="button" onclick="loginEmail()">Fortfahren</button>
     </div>
     <p style="text-align:center;margin-top:14px"><a href="#" onclick="showLanding();return false" style="color:var(--a2);font-size:13px">Zurück</a></p>
   </div>
 </div>
+
 <div id="app">
   <div class="shell">
     <aside class="side" id="sideNav"></aside>
@@ -128,13 +178,15 @@ input:focus,textarea:focus{border-color:var(--a)}textarea{min-height:88px;resize
       <div class="topbar">
         <div class="logo" style="font-size:16px">Verby<span>.</span></div>
         <div class="grow"></div>
-        <button class="btn btn-g btn-sm" type="button" onclick="render('settings')">Settings</button>
+        <span class="slm-badge" id="slmStatus" title="Offline-SLM">SLM off</span>
+        <button class="btn btn-g btn-sm" type="button" onclick="render('settings')">⚙️</button>
       </div>
       <div id="view"></div>
       <nav class="bottom-nav" id="bottomNav"></nav>
     </div>
   </div>
 </div>
+
 <div id="chat">
   <div class="chat-head">
     <button class="btn btn-g btn-sm" id="chatBack" type="button">←</button>
@@ -160,6 +212,7 @@ input:focus,textarea:focus{border-color:var(--a)}textarea{min-height:88px;resize
     </div>
   </div>
 </div>
+
 <div id="page" style="padding:24px 20px;max-width:720px;margin:0 auto"></div>
 <script src="app.js"></script>
 </body>
