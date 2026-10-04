@@ -2,5 +2,20 @@
   "appId": "app.verby.ai",
   "appName": "Verby",
   "webDir": "dist",
-  "server": { "url": "https://verby-ai.vercel.app", "cleartext": false }
+  "server": {
+    "url": "https://verby-ai.vercel.app",
+    "cleartext": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "backgroundColor": "#07070b"
+    }
+  },
+  "android": {
+    "allowMixedContent": false
+  },
+  "ios": {
+    "contentInset": "automatic"
+  }
 }

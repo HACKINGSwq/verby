@@ -2,14 +2,21 @@
   "name": "verby",
   "version": "7.9.0",
   "private": true,
+  "description": "Verby — Character.AI-style chats with unified design, streaming AI, cloud sync, native shell",
   "scripts": {
     "dev": "npx serve .",
+    "build": "echo 'Static SPA — copy to dist for Capacitor' && mkdir -p dist && cp -r index.html app.js app-core.js app-ui.js app-actions.js app-chat.js sw.js manifest.json api dist/ 2>/dev/null || true",
     "cap:init": "npx cap add android && npx cap add ios",
-    "cap:sync": "npx cap sync"
+    "cap:sync": "npm run build && npx cap sync",
+    "cap:android": "npx cap open android",
+    "cap:ios": "npx cap open ios",
+    "typecheck": "npx tsc --noEmit"
   },
   "devDependencies": {
     "@capacitor/cli": "^6.0.0",
     "@capacitor/core": "^6.0.0",
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/ios": "^6.0.0",
     "typescript": "^5.4.0"
   }
 }

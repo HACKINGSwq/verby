@@ -2,11 +2,17 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "ESNext",
+    "moduleResolution": "bundler",
     "strict": true,
     "allowJs": true,
     "checkJs": false,
     "noEmit": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"]
+    "skipLibCheck": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true
   },
-  "include": ["*.js", "api/**/*.js"]
+  "include": ["*.js", "api/**/*.js", "src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "android", "ios"]
 }
