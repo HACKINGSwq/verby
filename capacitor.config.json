@@ -1,0 +1,6 @@
+{
+  "appId": "app.verby.ai",
+  "appName": "Verby",
+  "webDir": "dist",
+  "server": { "url": "https://verby-ai.vercel.app", "cleartext": false }
+}

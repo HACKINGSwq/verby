@@ -1,9 +1,9 @@
-// Verby v6.0 loader
+// Verby v7.9 loader
 (function(){
   function load(src){
     return new Promise(function(resolve, reject){
       var s = document.createElement('script');
-      s.src = src + '?v=' + (window.VERBY_VERSION || '6.0.0') + '&t=' + Date.now();
+      s.src = src + '?v=' + (window.VERBY_VERSION || '7.9.0') + '&t=' + Date.now();
       s.onload = resolve; s.onerror = reject;
       document.head.appendChild(s);
     });
@@ -12,5 +12,5 @@
     .then(function(){ return load('app-ui.js'); })
     .then(function(){ return load('app-actions.js'); })
     .then(function(){ return load('app-chat.js'); })
-    .catch(function(e){ console.error(e); alert('App konnte nicht geladen werden.'); });
+    .catch(function(e){ console.error(e); alert('App-Load fehlgeschlagen'); });
 })();
