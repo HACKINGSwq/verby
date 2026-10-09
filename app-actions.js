@@ -1,4 +1,4 @@
-/* Verby v7.9 — Actions: save/delete char, fav, forum, keys, backup */
+/* Verby v7.9.1 — Actions: save/delete char, fav, forum, keys, backup, 18+ */
 function saveChar() {
   var name = (document.getElementById('cn').value || '').trim();
   var greeting = (document.getElementById('cg').value || '').trim();
@@ -95,14 +95,30 @@ function clearOpenAIKey() {
   alert('Lokale Keys gelöscht');
   render('settings');
 }
+function toggleAdultMode() {
+  if (store.isAdult()) {
+    if (!confirm('18+ deaktivieren? Chats werden wieder gefiltert (Friendly) und Credits gelten wieder.')) return;
+    store.setAdult(false);
+    alert('18+ aus — Friendly Mode');
+    render('settings');
+    return;
+  }
+  if (!confirm('Bestätigung: Ich bin mindestens 18 Jahre alt.\n\nDamit werden unfiltered Conversations freigeschaltet (NSFW erlaubt), keine App-Moderation im Prompt, unlimited Credits.\n\nWeiter?')) return;
+  if (!confirm('Letzte Bestätigung: 18+ Unfiltered aktivieren?')) return;
+  store.setAdult(true);
+  haptic();
+  alert('18+ aktiv — Unfiltered · No Moderation · Unlimited');
+  render('settings');
+}
 function exportBackup() {
   var data = {
-    v: window.VERBY_VERSION || '7.9',
+    v: window.VERBY_VERSION || '7.9.1',
     ts: Date.now(),
     user: store.user(),
     chars: store.chars(),
     favs: store.favs(),
     forum: store.forum(),
+    adult: store.isAdult(),
     memories: {}
   };
   store.chars().forEach(function (c) {
@@ -132,6 +148,7 @@ function importBackup() {
         if (data.chars) store.setChars(data.chars);
         if (data.favs) store.setFavs(data.favs);
         if (data.forum) store.setForum(data.forum);
+        if (data.adult) store.setAdult(true);
         if (data.memories) Object.keys(data.memories).forEach(function (id) { store.setMemory(id, data.memories[id]); });
         Object.keys(data).forEach(function (k) {
           if (k.indexOf('threads_') === 0) {
