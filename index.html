@@ -15,12 +15,17 @@ window.VERBY_SB = {
   url: 'https://urejdjknivskplofkckd.supabase.co',
   key: 'sb_publishable_TdfBrmzeodFFqZiwCf9Gnw_R4-hHxa2'
 };
-window.VERBY_VERSION = '7.9.0';
+window.VERBY_VERSION = '7.9.1';
 window.VERBY_CHANGELOG = [
+  {
+    v: '7.9.1',
+    t: '18+ Unfiltered · No Moderation · Unlimited',
+    detail: 'Settings → „Ich bin 18+“: Unfiltered Conversations (NSFW erlaubt), kein Friendly-Filter, keine Prompt-Moderation, unlimited Credits. Standard bleibt Friendly für unter 18. Nutzer bestätigt selbst das Alter.'
+  },
   {
     v: '7.9.0',
     t: 'One Design · c.ai-AI · Native Shell · Cloud-Sync · Offline-SLM',
-    detail: 'Einheitliches Design-System: Desktop = Sidebar links (Home, Chats, Discover, Create, Forum, Settings) — keine Nav-Pills mehr. Mobile = Bottom-Nav. Chat-Screen full. Character.AI-Pipeline: romanhafter Default, längere Antworten, Streaming, Memory/Lore auto-update, Prompt-Kern. Chat-Liste (alle aktiven, zuletzt genutzt). Großes Charakter-Profil. Create-Studio mit Live-Preview. Echte Cloud-Sync (verby_profiles/chars/chats + Realtime-Stub). Keys nur auf Server (OPENAI_API_KEY/ANTHROPIC_API_KEY). Capacitor Native App-Shell (iOS/Android/Desktop). Offline-SLM Platzhalter. TypeScript-Migration (tsconfig). HTTP-only Session via Supabase PKCE. PWA offline lesen.'
+    detail: 'Einheitliches Design-System: Desktop = Sidebar, Mobile = Bottom-Nav. Character.AI-Pipeline mit Streaming, Memory, Lore. Cloud-Sync, Capacitor App-Shell, Offline-SLM Platzhalter.'
   },
   { v: '6.0.0', t: 'Mega-Update Features', detail: 'Teilen, Badges, Seasons, Security.' },
   { v: '5.2.0', t: 'Login-Fix · Auto-Update', detail: 'OAuth stabil.' }
@@ -136,7 +141,7 @@ textarea{min-height:88px;resize:vertical}
 </style>
 </head>
 <body>
-<div id="updateOverlay"><div style="color:#fff;font-weight:650">Update lädt…</div><div id="updateBarWrap"><div id="updateBar"></div></div><div id="updateSub" style="color:#888;font-size:13px">v7.9.0</div></div>
+<div id="updateOverlay"><div style="color:#fff;font-weight:650">Update lädt…</div><div id="updateBarWrap"><div id="updateBar"></div></div><div id="updateSub" style="color:#888;font-size:13px">v7.9.1</div></div>
 <div class="offline-bar" id="offlineBar">Offline — Chats lokal lesbar · Offline-SLM Platzhalter · KI braucht Netz</div>
 
 <div id="landing">
@@ -145,9 +150,9 @@ textarea{min-height:88px;resize:vertical}
     <div class="row"><button class="btn btn-g btn-sm" type="button" onclick="showPage('updates')">Changelog</button><button class="btn btn-p btn-sm" type="button" onclick="goAuth()">Login</button></div>
   </div>
   <div class="hero">
-    <span class="badge">v7.9 · One Design · Smart AI · Native</span>
+    <span class="badge">v7.9.1 · 18+ Unfiltered</span>
     <h1>Chats wie Character.AI.<br>Ein Design. Überall.</h1>
-    <p>Sidebar · Bottom-Nav · Streaming · Memory · Cloud-Sync · Native App-Shell. Keys bleiben auf dem Server. Offline-SLM vorbereitet.</p>
+    <p>Sidebar · Bottom-Nav · Streaming · Memory · 18+ Unfiltered in Settings. Keys auf dem Server.</p>
     <div class="row" style="margin-top:20px;flex-wrap:wrap">
       <button class="btn btn-p" type="button" onclick="goAuth()">Anmelden</button>
       <button class="btn btn-g" type="button" onclick="showPage('updates')">Was ist neu</button>
