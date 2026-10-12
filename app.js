@@ -1,9 +1,9 @@
-// Verby v7.9.1 loader
+// Verby v7.9.2 loader
 (function(){
   function load(src){
     return new Promise(function(resolve, reject){
       var s = document.createElement('script');
-      s.src = src + '?v=' + (window.VERBY_VERSION || '7.9.1') + '&t=' + Date.now();
+      s.src = src + '?v=' + (window.VERBY_VERSION || '7.9.2') + '&t=' + Date.now();
       s.onload = resolve; s.onerror = reject;
       document.head.appendChild(s);
     });
