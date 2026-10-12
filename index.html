@@ -15,17 +15,22 @@ window.VERBY_SB = {
   url: 'https://urejdjknivskplofkckd.supabase.co',
   key: 'sb_publishable_TdfBrmzeodFFqZiwCf9Gnw_R4-hHxa2'
 };
-window.VERBY_VERSION = '7.9.1';
+window.VERBY_VERSION = '7.9.2';
 window.VERBY_CHANGELOG = [
+  {
+    v: '7.9.2',
+    t: 'Load-Fix · Skeletons',
+    detail: 'Render-Fehler abgefangen, Vercel-Redeploy, adult-patch lädt zuverlässig. Skeletons bleiben nicht mehr hängen.'
+  },
   {
     v: '7.9.1',
     t: '18+ Unfiltered · No Moderation · Unlimited',
-    detail: 'Settings → „Ich bin 18+“: Unfiltered Conversations (NSFW erlaubt), kein Friendly-Filter, keine Prompt-Moderation, unlimited Credits. Standard bleibt Friendly für unter 18. Nutzer bestätigt selbst das Alter.'
+    detail: 'Settings → „Ich bin 18+“: Unfiltered Conversations (NSFW erlaubt), kein Friendly-Filter, keine Prompt-Moderation, unlimited Credits.'
   },
   {
     v: '7.9.0',
-    t: 'One Design · c.ai-AI · Native Shell · Cloud-Sync · Offline-SLM',
-    detail: 'Einheitliches Design-System: Desktop = Sidebar, Mobile = Bottom-Nav. Character.AI-Pipeline mit Streaming, Memory, Lore. Cloud-Sync, Capacitor App-Shell, Offline-SLM Platzhalter.'
+    t: 'One Design · c.ai-AI · Native Shell · Cloud-Sync',
+    detail: 'Einheitliches Design-System: Desktop = Sidebar, Mobile = Bottom-Nav. Character.AI-Pipeline mit Streaming, Memory, Lore.'
   },
   { v: '6.0.0', t: 'Mega-Update Features', detail: 'Teilen, Badges, Seasons, Security.' },
   { v: '5.2.0', t: 'Login-Fix · Auto-Update', detail: 'OAuth stabil.' }
@@ -87,8 +92,6 @@ textarea{min-height:88px;resize:vertical}
 .side .brand{padding:8px 12px 20px;font-size:18px}
 .side .ni{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;color:var(--m);cursor:pointer;border:0;background:transparent;width:100%;font-size:14px;font-weight:600;text-align:left;transition:background .12s,color .12s}
 .side .ni.on,.side .ni:hover{background:rgba(139,92,246,.14);color:var(--a2)}
-.side .ni .dot{width:8px;height:8px;border-radius:50%;background:var(--a);margin-left:auto;display:none}
-.side .ni.has-dot .dot{display:block}
 .main{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0}
 .topbar{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--b);background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 #view{flex:1;overflow:auto;padding:16px;max-width:920px;width:100%;margin:0 auto;-webkit-overflow-scrolling:touch}
@@ -103,7 +106,6 @@ textarea{min-height:88px;resize:vertical}
 .msg.me{align-self:flex-end;background:linear-gradient(135deg,var(--user),#2a2448);border-bottom-right-radius:6px}
 .msg.bot{align-self:flex-start;background:var(--s2);border:1px solid var(--b);border-bottom-left-radius:6px}
 .msg .act{color:var(--a2);font-style:italic}
-.msg-tools button{background:0;border:0;color:var(--m);font-size:11px;cursor:pointer;margin-right:6px;margin-top:6px}
 .chat-input{padding:8px 12px max(10px,env(safe-area-inset-bottom));border-top:1px solid var(--b);background:rgba(7,7,11,.95);max-width:800px;width:100%;margin:0 auto}
 .chat-input .row input{border-radius:22px}
 .chat-input .send{width:44px;height:44px;border-radius:50%;border:0;background:var(--a);color:#fff;cursor:pointer;flex-shrink:0;font-size:16px}
@@ -141,7 +143,7 @@ textarea{min-height:88px;resize:vertical}
 </style>
 </head>
 <body>
-<div id="updateOverlay"><div style="color:#fff;font-weight:650">Update lädt…</div><div id="updateBarWrap"><div id="updateBar"></div></div><div id="updateSub" style="color:#888;font-size:13px">v7.9.1</div></div>
+<div id="updateOverlay"><div style="color:#fff;font-weight:650">Update lädt…</div><div id="updateBarWrap"><div id="updateBar"></div></div><div id="updateSub" style="color:#888;font-size:13px">v7.9.2</div></div>
 <div class="offline-bar" id="offlineBar">Offline — Chats lokal lesbar · Offline-SLM Platzhalter · KI braucht Netz</div>
 
 <div id="landing">
@@ -150,7 +152,7 @@ textarea{min-height:88px;resize:vertical}
     <div class="row"><button class="btn btn-g btn-sm" type="button" onclick="showPage('updates')">Changelog</button><button class="btn btn-p btn-sm" type="button" onclick="goAuth()">Login</button></div>
   </div>
   <div class="hero">
-    <span class="badge">v7.9.1 · 18+ Unfiltered</span>
+    <span class="badge">v7.9.2 · Load-Fix · 18+</span>
     <h1>Chats wie Character.AI.<br>Ein Design. Überall.</h1>
     <p>Sidebar · Bottom-Nav · Streaming · Memory · 18+ Unfiltered in Settings. Keys auf dem Server.</p>
     <div class="row" style="margin-top:20px;flex-wrap:wrap">
